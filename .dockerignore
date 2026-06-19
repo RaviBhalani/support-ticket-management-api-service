@@ -38,6 +38,10 @@ htmlcov/
 # Env files
 .env
 .envrc
+.envs/local/
+.envs/dev/
+.envs/test/
+.envs/prod/
 
 # Git
 .git/
