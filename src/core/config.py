@@ -1,10 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.core.constants import Environment
+
 
 class ServerSettings(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore")
 
-    environment: str
+    environment: Environment
     server_host: str = "0.0.0.0"
     server_port: int = 8000
 
