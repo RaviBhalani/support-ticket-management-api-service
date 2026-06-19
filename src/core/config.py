@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.core.constants import Environment
+from src.core.logging.constants import LogLevel, LogRenderer
 
 
 class ServerSettings(BaseSettings):
@@ -39,11 +40,23 @@ class RedisSettings(BaseSettings):
         return f"redis://{self.host}:{self.port}/0"
 
 
+class LoggingSettings(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore")
+
+    log_level: LogLevel = LogLevel.INFO
+    log_renderer: LogRenderer = LogRenderer.CONSOLE
+    log_timezone: str = "UTC"
+    enable_colored_console_logs: bool = False
+    enable_rich_traceback_formatter: bool = False
+
+
 class Settings:
+
     def __init__(self):
         self.server = ServerSettings()
         self.db = DatabaseSettings()
         self.redis = RedisSettings()
+        self.logging = LoggingSettings()
 
 
 settings = Settings()

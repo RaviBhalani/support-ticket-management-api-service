@@ -11,3 +11,6 @@ alembic==1.18.4
 
 # Celery
 celery==5.6.3
+
+# Logging
+structlog==26.1.0
