@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
       args:
         ENVIRONMENT: ${ENVIRONMENT}
-    command: celery -A src.celery worker --loglevel=info
+    command: celery -A src.core.celery worker --loglevel=info
     env_file:
       - .envs/test/api.env
       - .envs/test/db.env
