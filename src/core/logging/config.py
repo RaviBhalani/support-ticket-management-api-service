@@ -70,7 +70,7 @@ LOGGING_CONFIG = {
     },
     "root": {
         "handlers": ["console"],
-        "level": LOG_LEVEL,
+        "level": LOG_LEVEL.value,
     },
     "loggers": {
         "uvicorn": {
