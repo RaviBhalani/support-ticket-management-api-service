@@ -5,6 +5,7 @@ PROJECT_DESCRIPTION = "REST API for managing customer support tickets."
 PROJECT_VERSION = "1.0.0"
 DOCS_URL = "/docs"
 REDOC_URL = "/redoc"
+OPENAPI_URL = "/openapi.json"
 
 
 class Environment(str, Enum):

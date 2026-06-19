@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 
-from src.core.constants import PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_VERSION, DOCS_URL, REDOC_URL
+from src.core.constants import PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_VERSION, DOCS_URL, REDOC_URL, OPENAPI_URL
 from src.core.database import dispose_engine
 from src.core.logging.config import LOGGING_CONFIG, configure_structlog
 
@@ -28,4 +28,5 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=DOCS_URL,
     redoc_url=REDOC_URL,
+    openapi_url=OPENAPI_URL,
 )
