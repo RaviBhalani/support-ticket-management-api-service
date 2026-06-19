@@ -7,7 +7,7 @@ pydantic-settings==2.14.1
 sqlalchemy==2.0.51
 asyncpg==0.31.0
 redis==8.0.0
-alembic==1.18.4
+alembic[tz]==1.18.4
 
 # Celery
 celery==5.6.3
