@@ -37,7 +37,7 @@ services:
     env_file:
       - .envs/local/db.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
   redis:
     image: redis:8.8.0
