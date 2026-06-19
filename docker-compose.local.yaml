@@ -16,6 +16,22 @@ services:
       - db
       - redis
 
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: ${ENVIRONMENT}
+    command: celery -A src.celery worker --loglevel=info
+    env_file:
+      - .envs/local/api.env
+      - .envs/local/db.env
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
   db:
     image: postgres:18
     env_file:
