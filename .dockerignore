@@ -1,0 +1,52 @@
+# IDE
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[codz]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Env files
+.env
+.envrc
+
+# Git
+.git/
+.gitignore
+
+# Docs
+docs/_build/
+
+# Misc
+*.log
+*.pot
+*.mo
