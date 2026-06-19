@@ -9,3 +9,16 @@ services:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .envs/dev/api.env
+      - .envs/dev/db.env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:18
+    env_file:
+      - .envs/dev/db.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
