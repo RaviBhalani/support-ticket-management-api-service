@@ -50,6 +50,15 @@ class LoggingSettings(BaseSettings):
     enable_rich_traceback_formatter: bool = False
 
 
+class CORSSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="CORS_", extra="ignore")
+
+    allowed_origins: list[str] = []
+    allowed_methods: list[str] = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    allowed_headers: list[str] = ["*"]
+    allow_credentials: bool = True
+
+
 class Settings:
 
     def __init__(self):
@@ -57,6 +66,7 @@ class Settings:
         self.db = DatabaseSettings()
         self.redis = RedisSettings()
         self.logging = LoggingSettings()
+        self.cors = CORSSettings()
 
 
 settings = Settings()
