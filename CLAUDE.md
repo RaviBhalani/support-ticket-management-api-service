@@ -90,6 +90,7 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - Shared constants (`PROJECT_NAME`, `API_V1_PREFIX`, `APP_STARTUP_MSG`, `APP_SHUTDOWN_MSG`, `DEFAULT_ERROR_MSG`, `Environment`) live in `src/core/constants.py`.
 - Domain constants (endpoint paths, cookie names, token types, algorithm, error messages, enums, field limits) live in `src/{app}/constants.py`.
 - Define constants for all meaningful string literals — endpoint paths, cookie names, token types, error messages, algorithm names, and log messages. A value used in only one place still warrants a constant if it represents a meaningful domain value. Log message strings are defined as constants (personal preference).
+- `PASSWORD_MAX_LENGTH = 60` — bcrypt hashes are always exactly 60 characters regardless of input length.
 
 ### Logging
 
@@ -144,7 +145,8 @@ Key placement rules:
 
 ### Authentication
 
-- **JWT algorithm**: RS256 (asymmetric). Private key signs; public key verifies. Both stored as env vars (`JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`).
+- **JWT algorithm**: RS256 (asymmetric). Private key signs; public key verifies. Both stored as env vars (`JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`). `PyJWT` requires the `cryptography` package for RS256 — pin it explicitly as a direct dependency.
+- **Password hashing**: use `bcrypt` directly (`bcrypt.checkpw`, `bcrypt.hashpw`) — not `passlib`, which is abandoned (last release 2020) and breaks with `bcrypt >= 4.0`.
 - Tokens are delivered via httpOnly cookies **only** — never in the response body.
 - Cookie settings applied to all auth cookies: `httponly=True`, `samesite=CookieSameSite.STRICT.value`, `secure=is_secure()`.
 - `secure=True` when `ENVIRONMENT != local`; `False` on local to allow HTTP.
