@@ -17,3 +17,6 @@ class Environment(str, Enum):
 
 
 DEFAULT_ERROR_MSG = "An unexpected error occurred."
+
+APP_STARTUP_MSG = "Starting up"
+APP_SHUTDOWN_MSG = "Shutting down"

@@ -12,12 +12,14 @@ from src.core.exceptions import AppException
 from src.core.openapi import OPENAPI_TAGS
 from src.core.constants import (
     API_V1_PREFIX,
+    APP_SHUTDOWN_MSG,
+    APP_STARTUP_MSG,
     DOCS_URL,
     OPENAPI_URL,
     PROJECT_DESCRIPTION,
     PROJECT_NAME,
     PROJECT_VERSION,
-    REDOC_URL
+    REDOC_URL,
 )
 from src.core.database import dispose_engine
 from src.core.logging.config import LOGGING_CONFIG, configure_structlog
@@ -30,10 +32,10 @@ logger = structlog.get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting up")
+    logger.info(APP_STARTUP_MSG)
     yield
     await dispose_engine()
-    logger.info("Shutting down")
+    logger.info(APP_SHUTDOWN_MSG)
 
 
 app = FastAPI(
