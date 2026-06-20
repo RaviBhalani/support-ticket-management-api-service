@@ -59,6 +59,15 @@ class CORSSettings(BaseSettings):
     allow_credentials: bool = True
 
 
+class JWTSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="JWT_", extra="ignore")
+
+    private_key: str
+    public_key: str
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+
 class Settings:
 
     def __init__(self):
@@ -67,6 +76,7 @@ class Settings:
         self.redis = RedisSettings()
         self.logging = LoggingSettings()
         self.cors = CORSSettings()
+        self.jwt = JWTSettings()
 
 
 settings = Settings()
