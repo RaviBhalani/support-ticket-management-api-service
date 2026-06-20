@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENVIRONMENT: ${ENVIRONMENT}
+        ENVIRONMENT: ${SERVER_ENVIRONMENT}
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENVIRONMENT: ${ENVIRONMENT}
+        ENVIRONMENT: ${SERVER_ENVIRONMENT}
     command: celery -A src.core.celery worker --loglevel=info
     env_file:
       - .envs/test/api.env
