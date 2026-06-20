@@ -4,8 +4,8 @@ from src.core.config import settings
 from src.core.logging.constants import LogRenderer
 from src.core.logging.utils import redact_sensitive_data, log_timestamper
 
-LOG_LEVEL = settings.logging.log_level
-LOG_RENDERER = settings.logging.log_renderer
+LOG_LEVEL = settings.logging.level
+LOG_RENDERER = settings.logging.renderer
 ENABLE_COLORED_CONSOLE_LOGS = settings.logging.enable_colored_console_logs
 ENABLE_RICH_TRACEBACK_FORMATTER = settings.logging.enable_rich_traceback_formatter
 

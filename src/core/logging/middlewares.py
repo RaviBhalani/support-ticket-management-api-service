@@ -1,6 +1,8 @@
 import uuid
 import structlog
 
+from src.core.logging.constants import HTTP_SCOPE_TYPE
+
 
 class StructlogContextMiddleware:
 
@@ -9,7 +11,7 @@ class StructlogContextMiddleware:
 
     async def __call__(self, scope, receive, send):
 
-        if scope["type"] != "http":
+        if scope["type"] != HTTP_SCOPE_TYPE:
             await self.app(scope, receive, send)
             return
 

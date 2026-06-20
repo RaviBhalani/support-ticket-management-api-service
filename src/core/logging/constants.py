@@ -1,6 +1,7 @@
 import re
 from enum import Enum
 
+HTTP_SCOPE_TYPE = "http"
 REDACTION_TEXT = "***REDACTED***"
 TOKEN_PATTERN = (
     r"Bearer\s+[A-Za-z0-9\-._~+/]+=*"

@@ -1,7 +1,7 @@
 from celery import Celery
 
 from src.core.config import settings
-from src.core.constants import PROJECT_NAME
+from src.core.constants import PROJECT_NAME, SERIALIZER_JSON, TIMEZONE_UTC
 
 app = Celery(
     PROJECT_NAME,
@@ -10,9 +10,9 @@ app = Celery(
 )
 
 app.conf.update(
-    task_serializer="json",
-    accept_content=["json"],
-    result_serializer="json",
-    timezone="UTC",
+    task_serializer=SERIALIZER_JSON,
+    accept_content=[SERIALIZER_JSON],
+    result_serializer=SERIALIZER_JSON,
+    timezone=TIMEZONE_UTC,
     enable_utc=True,
 )

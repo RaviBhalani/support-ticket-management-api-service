@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENVIRONMENT: ${ENVIRONMENT}
+        ENVIRONMENT: ${SERVER_ENVIRONMENT}
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
@@ -13,7 +13,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      - postgres
       - redis
 
   celery:
@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENVIRONMENT: ${ENVIRONMENT}
+        ENVIRONMENT: ${SERVER_ENVIRONMENT}
     command: celery -A src.core.celery worker --loglevel=info
     env_file:
       - .envs/local/api.env
@@ -29,10 +29,10 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      - postgres
       - redis
 
-  db:
+  postgres:
     image: postgres:18
     env_file:
       - .envs/local/db.env

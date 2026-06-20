@@ -9,7 +9,7 @@ from src.core.logging.constants import (
     SENSITIVE_VALUE_RE,
 )
 
-LOG_TZ_INFO = ZoneInfo(settings.logging.log_timezone)
+LOG_TZ_INFO = ZoneInfo(settings.logging.timezone)
 
 
 def _redact_value(value):
