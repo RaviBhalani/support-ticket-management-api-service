@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.v1.router import router as api_v1_router
 from src.core.config import settings
+from src.core.exception_handlers import app_exception_handler
+from src.core.exceptions import AppException
 from src.core.constants import (
     API_V1_PREFIX,
     DOCS_URL,
@@ -51,5 +53,7 @@ app.add_middleware(
     allow_headers=settings.cors.allowed_headers,
     allow_credentials=settings.cors.allow_credentials,
 )
+
+app.add_exception_handler(AppException, app_exception_handler)
 
 app.include_router(api_v1_router, prefix=API_V1_PREFIX)
