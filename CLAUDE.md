@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Support Ticket Management API Service — a FastAPI backend for managing customer support tickets, built as a job assignment for Everestek Technosoft Solutions. Not everything in `docs/Backend Engineering Assignment.pdf` will be implemented; the user will direct what to build.
+Support Ticket Management API Service — a FastAPI backend for managing customer support tickets, built as a job assignment for Everestek Technosoft Solutions. Not everything in `docs/Backend Engineering Assignment.pdf` will be implemented; the user will direct what to build. Refer to `docs/ER Diagram.png` when designing new ORM models — it is the authoritative schema reference.
 
 ## Tech Stack
 
@@ -28,14 +28,15 @@ pip install -r requirements/{env}.txt
 
 **Run with Docker**:
 ```bash
-make run ENV=<env>   # tears down and rebuilds using docker-compose.{env}.yaml + .envs/{env}/api.env
+make run ENV=<env>
 ```
+`make run` passes `.envs/{env}/api.env` to Docker Compose for variable substitution in the compose file (e.g. `${SERVER_PORT}`). The containers themselves load both `.envs/{env}/api.env` and `.envs/{env}/db.env` via the `env_file` key inside the compose YAML.
 
 `server.sh` is the container entrypoint — runs uvicorn with `--reload` when `ENVIRONMENT=local`, without it otherwise.
 
 ## Docker Compose Services
 
-Each compose file defines four services: `server`, `celery`, `db` (PostgreSQL), `redis`.
+Each compose file defines four services: `server`, `celery`, `postgres`, `redis`.
 
 ## Common Commands
 
@@ -67,12 +68,16 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 | `RedisSettings` | `REDIS_` | `REDIS_HOST`, `REDIS_PORT` |
 | `LoggingSettings` | _(none)_ | `LOG_LEVEL`, `LOG_RENDERER` |
 | `CORSSettings` | `CORS_` | `CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_CREDENTIALS` |
+| `JWTSettings` | `JWT_` | `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY` |
 
 ### Database
 
 - Inject the async session via `get_session` from `src.core.database` as a FastAPI dependency.
 - All ORM models extend `Base` from `src.core.models`. `Base` auto-includes an `id: Mapped[int]` integer primary key — do not redeclare it in subclasses.
 - SQL echo is enabled automatically when `ENVIRONMENT=local`.
+- `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`.
+- Repository methods use `session.flush()`, not `session.commit()`. `get_session` commits on success and rolls back on exception — never call `session.commit()` in a repo or service.
+- When adding a new domain's ORM models, import the models module in `alembic/env.py`: `from src.{app} import models as _  # noqa: F401`. Without this, `--autogenerate` produces an empty migration.
 
 ### Celery
 
@@ -82,8 +87,9 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 
 ### Constants
 
-- App-level metadata (`PROJECT_NAME`, `PROJECT_DESCRIPTION`, `PROJECT_VERSION`, `DOCS_URL`, `REDOC_URL`, `OPENAPI_URL`) lives in `src/core/constants.py`.
-- Do not define constants for log message strings — log inline. A constant is only justified when a value is reused across multiple call sites or is non-obvious from the literal.
+- Shared constants (`PROJECT_NAME`, `API_V1_PREFIX`, `APP_STARTUP_MSG`, `APP_SHUTDOWN_MSG`, `DEFAULT_ERROR_MSG`, `Environment`) live in `src/core/constants.py`.
+- Domain constants (endpoint paths, cookie names, token types, algorithm, error messages, enums, field limits) live in `src/{app}/constants.py`.
+- Define constants for all meaningful string literals — endpoint paths, cookie names, token types, error messages, algorithm names, and log messages. A value used in only one place still warrants a constant if it represents a meaningful domain value. Log message strings are defined as constants (personal preference).
 
 ### Logging
 
@@ -91,6 +97,7 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - `src/core/logging/constants.py` must stay free of project imports — it is the only logging file that `src/core/config.py` can safely import from without causing a circular import.
 - Do not add `filter_by_level` to the structlog processor chain — level filtering is handled by `LOGGING_CONFIG`.
 - Sensitive key matching is substring-based: any key whose name *contains* a sensitive word (e.g. `user_token`, `x_api_key`) is redacted, not just exact matches.
+- `StructlogContextMiddleware` auto-binds `request_id`, `method`, `path`, `client_host` to structlog's context for every HTTP request. Do not re-bind these in route handlers or services.
 
 ### Domain Apps
 
@@ -98,13 +105,59 @@ Each domain lives under `src/{app}/` and follows this file layout:
 
 | File | Purpose |
 |------|---------|
-| `constants.py` | `TABLE_NAME` string, enums (e.g. `UserRole`), field-length limits |
+| `constants.py` | `TABLE_NAME` string, enums, field-length limits, endpoint paths, error messages |
 | `models.py` | SQLAlchemy ORM models extending `Base` |
+| `schemas.py` | Pydantic request/response models |
+| `services.py` | Business logic — no FastAPI imports allowed |
+| `dependencies.py` | FastAPI `Depends` wiring: input extraction, repo/service instantiation |
+| `router.py` | HTTP concerns only: request/response, cookies, status codes |
+| `exceptions.py` | Domain exceptions extending `AppException` |
 | `tasks.py` | Celery tasks (only when async work is needed) |
 
-`src/users/` is the reference implementation. Add `router.py`, `schemas.py`, `services.py`, etc. as needed when building out endpoints.
+`src/users/` and `src/auth/` are reference implementations.
+
+### Layer Separation
+
+Enforce strict separation between layers. Each layer has one responsibility and prohibited imports:
+
+| Layer | File | Responsibility | Must not import |
+|-------|------|---------------|-----------------|
+| Router | `router.py` | HTTP only — cookies, status codes, request body, response | Business logic, DB |
+| Dependencies | `dependencies.py` | Wire inputs and resources via `Depends` | Business logic |
+| Services | `services.py` | All business logic, raise domain exceptions | `fastapi`, `Depends` |
+| Repository | `repository.py` | Data access only | FastAPI, services |
+
+Key placement rules:
+- Business logic that raises a domain exception or makes a domain decision → **services**.
+- Raw input extraction (`Cookie()`, `Header()`, `Query()`) → **router** parameter, not a dependency wrapper.
+- Config-based wiring (e.g. `is_secure` checking `ENVIRONMENT`) → **dependencies**, not services.
+- Repo instantiation → **dependencies** factory function (e.g. `get_user_repository`), injected into the router via `Depends`.
+
+### Error Handling
+
+- `AppException` base lives in `src/core/exceptions.py`. Subclasses set `status_code` and `detail` as **class attributes**, not constructor args.
+- Domain exceptions live in `src/{app}/exceptions.py` and extend `AppException`.
+- One generic handler in `src/core/exception_handlers.py` covers all `AppException` subclasses — no per-exception handlers.
+- Register with `app.add_exception_handler(AppException, app_exception_handler)` in `main.py`.
+- Always use `starlette.status` constants (e.g. `status.HTTP_401_UNAUTHORIZED`), never raw integers.
+- Error message strings are constants in `src/{app}/constants.py`.
+
+### Authentication
+
+- **JWT algorithm**: RS256 (asymmetric). Private key signs; public key verifies. Both stored as env vars (`JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`).
+- Tokens are delivered via httpOnly cookies **only** — never in the response body.
+- Cookie settings applied to all auth cookies: `httponly=True`, `samesite=CookieSameSite.STRICT.value`, `secure=is_secure()`.
+- `secure=True` when `ENVIRONMENT != local`; `False` on local to allow HTTP.
+- Access token cookie path: `/` (sent with every request). Refresh token cookie path: `/api/v1/auth/refresh` (limits exposure to the refresh endpoint only).
+- `CookieSameSite` is a `(str, Enum)` — consistent with `UserRole` and `Environment`.
+- Use `LoginResponse.model_validate(orm_instance)` with `model_config = ConfigDict(from_attributes=True)` in response schemas instead of manually mapping ORM fields.
+- `decode_token` stays as a standalone function, separate from `refresh_access_token` — it is a reusable cryptographic primitive that future token-authenticated endpoints (e.g. `GET /me`) will call directly.
 
 ### API
 
-- When adding a router, pass `tags` to it and add a matching entry to `openapi_tags` in `main.py` so the Swagger UI shows grouped, described sections.
+- When adding a new domain router, two files must be updated:
+  1. `src/api/v1/router.py` — include the domain router following the auth pattern: import the prefix constant and the router, then call `router.include_router(...)`.
+  2. `src/core/openapi.py` — import the tag constants from `src.{app}.constants` and append to `OPENAPI_TAGS`.
+- `OPENAPI_TAGS` lives in `src/core/openapi.py` — **not** `src/core/constants.py`. Domain constants import from `src.core.constants`; the reverse would create a circular import.
+- Tag name and description are constants in `src/{app}/constants.py` (e.g. `AUTH_TAG`, `AUTH_TAG_DESCRIPTION`).
 - Swagger UI is at `/docs`, ReDoc at `/redoc`.
