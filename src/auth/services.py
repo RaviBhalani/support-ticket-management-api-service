@@ -1,19 +1,23 @@
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 import jwt
-from passlib.context import CryptContext
 
 from src.auth.constants import ACCESS_TOKEN_TYPE, ALGORITHM, REFRESH_TOKEN_TYPE
-from src.auth.exceptions import InvalidCredentialsError, InvalidTokenError, InvalidTokenTypeError, RefreshTokenMissingError, TokenExpiredError
+from src.auth.exceptions import (
+    InvalidCredentialsError,
+    InvalidTokenError,
+    InvalidTokenTypeError,
+    RefreshTokenMissingError,
+    TokenExpiredError
+)
 from src.core.config import settings
 from src.users.models import User
 from src.users.repository import UserRepository
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 
 def create_access_token(user_id: int) -> str:
