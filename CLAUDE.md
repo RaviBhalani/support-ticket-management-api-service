@@ -28,7 +28,7 @@ pip install -r requirements/{env}.txt
 
 **Run with Docker**:
 ```bash
-./run_server.sh <env>   # tears down and rebuilds using docker-compose.{env}.yaml + .envs/{env}/api.env
+make run ENV=<env>   # tears down and rebuilds using docker-compose.{env}.yaml + .envs/{env}/api.env
 ```
 
 `server.sh` is the container entrypoint — runs uvicorn with `--reload` when `ENVIRONMENT=local`, without it otherwise.
@@ -41,9 +41,12 @@ Each compose file defines four services: `server`, `celery`, `db` (PostgreSQL), 
 
 | Task | Command |
 |------|---------|
-| Run dev server | `uvicorn src.main:app --reload` |
-| Run Celery worker | `celery -A src.core.celery worker --loglevel=info` |
-| Run migrations | `alembic upgrade head` |
+| Rebuild & start Docker services | `make run ENV=<env>` |
+| Generate a migration (inside Docker) | `make migration ENV=<env> msg="<message>"` |
+| Apply pending migrations (inside Docker) | `make upgrade` |
+| Roll back last migration (inside Docker) | `make downgrade` |
+| Run dev server (outside Docker) | `uvicorn src.main:app --reload` |
+| Run Celery worker (outside Docker) | `celery -A src.core.celery worker --loglevel=info` |
 
 No test suite exists yet. Commands will be added once `tests/` is established.
 
@@ -63,11 +66,12 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 | `DatabaseSettings` | `POSTGRES_` | `POSTGRES_USER`, `POSTGRES_DB` |
 | `RedisSettings` | `REDIS_` | `REDIS_HOST`, `REDIS_PORT` |
 | `LoggingSettings` | _(none)_ | `LOG_LEVEL`, `LOG_RENDERER` |
+| `CORSSettings` | `CORS_` | `CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_CREDENTIALS` |
 
 ### Database
 
 - Inject the async session via `get_session` from `src.core.database` as a FastAPI dependency.
-- All ORM models extend `Base` from `src.core.models`.
+- All ORM models extend `Base` from `src.core.models`. `Base` auto-includes an `id: Mapped[int]` integer primary key — do not redeclare it in subclasses.
 - SQL echo is enabled automatically when `ENVIRONMENT=local`.
 
 ### Celery
@@ -78,7 +82,7 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 
 ### Constants
 
-- App-level metadata (`PROJECT_NAME`, `PROJECT_DESCRIPTION`, `PROJECT_VERSION`, `DOCS_URL`, `REDOC_URL`) lives in `src/core/constants.py`.
+- App-level metadata (`PROJECT_NAME`, `PROJECT_DESCRIPTION`, `PROJECT_VERSION`, `DOCS_URL`, `REDOC_URL`, `OPENAPI_URL`) lives in `src/core/constants.py`.
 - Do not define constants for log message strings — log inline. A constant is only justified when a value is reused across multiple call sites or is non-obvious from the literal.
 
 ### Logging
@@ -87,6 +91,18 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - `src/core/logging/constants.py` must stay free of project imports — it is the only logging file that `src/core/config.py` can safely import from without causing a circular import.
 - Do not add `filter_by_level` to the structlog processor chain — level filtering is handled by `LOGGING_CONFIG`.
 - Sensitive key matching is substring-based: any key whose name *contains* a sensitive word (e.g. `user_token`, `x_api_key`) is redacted, not just exact matches.
+
+### Domain Apps
+
+Each domain lives under `src/{app}/` and follows this file layout:
+
+| File | Purpose |
+|------|---------|
+| `constants.py` | `TABLE_NAME` string, enums (e.g. `UserRole`), field-length limits |
+| `models.py` | SQLAlchemy ORM models extending `Base` |
+| `tasks.py` | Celery tasks (only when async work is needed) |
+
+`src/users/` is the reference implementation. Add `router.py`, `schemas.py`, `services.py`, etc. as needed when building out endpoints.
 
 ### API
 
