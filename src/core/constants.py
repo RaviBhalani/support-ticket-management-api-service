@@ -16,6 +16,9 @@ class Environment(str, Enum):
     PROD = "prod"
 
 
+SERIALIZER_JSON = "json"
+TIMEZONE_UTC = "UTC"
+
 DEFAULT_ERROR_MSG = "An unexpected error occurred."
 
 APP_STARTUP_MSG = "Starting up"
