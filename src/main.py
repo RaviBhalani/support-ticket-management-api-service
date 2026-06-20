@@ -9,6 +9,7 @@ from src.api.v1.router import router as api_v1_router
 from src.core.config import settings
 from src.core.exception_handlers import app_exception_handler
 from src.core.exceptions import AppException
+from src.core.openapi import OPENAPI_TAGS
 from src.core.constants import (
     API_V1_PREFIX,
     DOCS_URL,
@@ -43,6 +44,7 @@ app = FastAPI(
     docs_url=DOCS_URL,
     redoc_url=REDOC_URL,
     openapi_url=OPENAPI_URL,
+    openapi_tags=OPENAPI_TAGS,
 )
 
 app.add_middleware(StructlogContextMiddleware)
