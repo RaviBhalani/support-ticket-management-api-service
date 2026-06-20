@@ -12,5 +12,9 @@ alembic[tz]==1.18.4
 # Celery
 celery==5.6.3
 
+# Auth
+PyJWT==2.13.0
+passlib[bcrypt]==1.7.4
+
 # Logging
 structlog==26.1.0
