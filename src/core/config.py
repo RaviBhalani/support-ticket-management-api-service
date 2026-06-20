@@ -41,11 +41,11 @@ class RedisSettings(BaseSettings):
 
 
 class LoggingSettings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="LOG_", extra="ignore")
 
-    log_level: LogLevel = LogLevel.INFO
-    log_renderer: LogRenderer = LogRenderer.CONSOLE
-    log_timezone: str = "UTC"
+    level: LogLevel = LogLevel.INFO
+    renderer: LogRenderer = LogRenderer.CONSOLE
+    timezone: str = "UTC"
     enable_colored_console_logs: bool = False
     enable_rich_traceback_formatter: bool = False
 
