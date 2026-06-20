@@ -13,7 +13,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      - postgres
       - redis
 
   celery:
@@ -29,10 +29,10 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      - postgres
       - redis
 
-  db:
+  postgres:
     image: postgres:18
     env_file:
       - .envs/local/db.env

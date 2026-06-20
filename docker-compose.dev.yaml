@@ -11,7 +11,7 @@ services:
       - .envs/dev/api.env
       - .envs/dev/db.env
     depends_on:
-      - db
+      - postgres
       - redis
 
   celery:
@@ -25,10 +25,10 @@ services:
       - .envs/dev/api.env
       - .envs/dev/db.env
     depends_on:
-      - db
+      - postgres
       - redis
 
-  db:
+  postgres:
     image: postgres:18
     env_file:
       - .envs/dev/db.env
