@@ -14,3 +14,6 @@ class Environment(str, Enum):
     DEV = "dev"
     TEST = "test"
     PROD = "prod"
+
+
+DEFAULT_ERROR_MSG = "An unexpected error occurred."
