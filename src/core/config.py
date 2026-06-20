@@ -5,11 +5,11 @@ from src.core.logging.constants import LogLevel, LogRenderer
 
 
 class ServerSettings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="SERVER_", extra="ignore")
 
     environment: Environment
-    server_host: str = "0.0.0.0"
-    server_port: int = 8000
+    host: str = "0.0.0.0"
+    port: int = 8000
 
 
 class DatabaseSettings(BaseSettings):
