@@ -67,6 +67,7 @@ VALID_STATUS_TRANSITIONS: dict[TicketStatus, frozenset[TicketStatus]] = {
 }
 
 # Endpoint paths
+LIST_TICKETS_ENDPOINT = ""
 CREATE_TICKET_ENDPOINT = ""
 GET_TICKET_ENDPOINT = "/{ticket_id}"
 UPDATE_TICKET_ENDPOINT = "/{ticket_id}"
