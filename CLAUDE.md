@@ -76,7 +76,7 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - Inject the async session via `get_session` from `src.core.database` as a FastAPI dependency.
 - All ORM models extend `Base` from `src.core.models`. `Base` auto-includes an `id: Mapped[int]` integer primary key — do not redeclare it in subclasses.
 - SQL echo is enabled automatically when `ENVIRONMENT=local`.
-- `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`.
+- `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`, `flush`, `refresh`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`. Call `repo.flush()` then `repo.refresh(instance)` after mutating an ORM object when you need server-generated values (e.g. `modified_ts` from `onupdate=func.now()`) to be present on the instance before Pydantic serialises it — asyncpg does not return UPDATE results via RETURNING, so SQLAlchemy marks the object expired after a flush.
 - Repository methods use `session.flush()`, not `session.commit()`. `get_session` commits on success and rolls back on exception — never call `session.commit()` in a repo or service.
 - When adding a new domain's ORM models, import the models module in `alembic/env.py`: `from src.{app} import models as _  # noqa: F401`. Without this, `--autogenerate` produces an empty migration.
 - FK references use constants: define `<ENTITY>_FK = f"{TABLE_NAME}.id"` in `src/{app}/constants.py` (e.g., `USER_FK = f"{TABLE_NAME}.id"` in `src/users/constants.py`). Import this constant in any model that references the entity as a foreign key — never hardcode `"users.id"` inside a model file.
@@ -94,6 +94,38 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - Place tasks in `src/{app}/tasks.py` within the relevant domain app.
 - Celery tasks that need DB access must use `sync_session_factory` from `src.core.database` — Celery workers run synchronously, not in an async event loop.
 - Email templates: place HTML files in `src/{app}/templates/`. Load with `read_template(__file__, template_name)` from `src.core.utils`. Use `str.replace("{{placeholder}}", value)` chains for substitution. Use `DATETIME_DISPLAY_FORMAT` from `src.core.constants` to format `datetime` values for display.
+
+### Pagination & Filtering
+
+For paginated list endpoints use `fastapi-pagination` + `fastapi-filter` (both in `requirements/base.txt`).
+
+- **Service layer:** the `list_*` service function is **synchronous** and returns a SQLAlchemy `Select` statement — not a list. It delegates to the repo's query-builder method.
+- **Repository layer:** the query-builder (e.g. `list_query_for_user`) applies `WHERE`/`ORDER BY` and returns a `Select`. Do not execute the query here.
+- **Router layer:** call `paginate(deps.session, query, params=params, transformer=...)` from `fastapi_pagination.ext.sqlalchemy`. The `transformer` lambda selects the correct response schema per role: `lambda items: [Schema.model_validate(t) for t in items]`.
+- **Filter class:** subclass `fastapi_filter.contrib.sqlalchemy.Filter`. Declare fields with the `__in` suffix for multi-value filtering and set `Constants.model = YourModel`. Inject with `FilterDepends(YourFilter)` in the router.
+- **Pagination params:** inject `params: Params = Depends()` from `fastapi_pagination`. Default `size` is 50; no custom pagination constants are needed.
+- **`add_pagination(app)`** is not required when calling `paginate()` explicitly in route handlers — avoid it to keep `main.py` minimal.
+
+### Dependency Bundling
+
+When a router needs multiple repositories **and** a session (required by `paginate()`), group them into a `NameDependencies` class instead of listing four `Depends(...)` parameters on every endpoint:
+
+```python
+class TicketDependencies:
+    def __init__(
+        self,
+        session: AsyncSession = Depends(get_session),
+        repo: TicketRepository = Depends(get_ticket_repository),
+        history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
+        user_repo: UserRepository = Depends(get_user_repository),
+    ) -> None:
+        self.session = session
+        self.repo = repo
+        self.history_repo = history_repo
+        self.user_repo = user_repo
+```
+
+Endpoints declare `deps: TicketDependencies = Depends()`. The `session` attribute is required because `paginate()` takes it directly. Standalone factory functions (`get_ticket_repository`, etc.) still exist for injection outside the bundle.
 
 ### Scripts
 
