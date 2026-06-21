@@ -7,6 +7,7 @@ Truncate the users table before re-seeding:
 """
 import asyncio
 import os
+import selectors
 import sys
 from pathlib import Path
 
@@ -78,4 +79,9 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Windows defaults to ProactorEventLoop which psycopg async does not support.
+    # SelectorEventLoop is required and works on all platforms.
+    asyncio.run(
+        main(),
+        loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector()),
+    )
