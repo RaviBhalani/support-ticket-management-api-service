@@ -10,6 +10,7 @@ from alembic import context
 from src.core.config import settings
 from src.core.models import Base
 from src.users import models as _  # noqa: F401
+from src.tickets import models as _tickets_models  # noqa: F401
 
 config = context.config
 
