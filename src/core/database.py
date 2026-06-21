@@ -5,12 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import sessionmaker
 
 from src.core.config import settings
-from src.core.constants import Environment
 
-async_engine = create_async_engine(
-    settings.db.async_url,
-    echo=settings.server.environment == Environment.LOCAL,
-)
+async_engine = create_async_engine(settings.db.async_url)
 async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
 
 sync_engine = create_engine(settings.db.sync_url)
