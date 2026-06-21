@@ -5,8 +5,8 @@ TABLE_NAME = "users"
 
 # Roles
 class UserRole(str, Enum):
-    AGENT = "agent"
-    CUSTOMER = "customer"
+    AGENT = "AGENT"
+    CUSTOMER = "CUSTOMER"
 
 # Field limits
 NAME_MAX_LENGTH = 150
