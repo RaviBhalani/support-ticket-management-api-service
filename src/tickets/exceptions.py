@@ -4,7 +4,8 @@ from src.core.exceptions import AppException
 from src.tickets.constants import (
     CUSTOMER_NOT_FOUND_MSG,
     INVALID_CUSTOMER_ROLE_MSG,
-    STATUS_CHANGE_NOT_ALLOWED_MSG,
+    INVALID_STATUS_TRANSITION_MSG,
+    TICKET_NOT_ASSIGNED_MSG,
     TICKET_NOT_FOUND_MSG,
 )
 
@@ -24,9 +25,9 @@ class TicketNotFoundError(AppException):
     detail = TICKET_NOT_FOUND_MSG
 
 
-class StatusChangeNotAllowedError(AppException):
+class TicketNotAssignedError(AppException):
     status_code = status.HTTP_403_FORBIDDEN
-    detail = STATUS_CHANGE_NOT_ALLOWED_MSG
+    detail = TICKET_NOT_ASSIGNED_MSG
 
 
 class InvalidStatusTransitionError(AppException):

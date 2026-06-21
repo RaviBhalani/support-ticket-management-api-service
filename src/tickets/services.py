@@ -5,6 +5,7 @@ from src.tickets.constants import (
     LOG_TICKET_CREATED,
     LOG_TICKET_STATUS_CHANGED,
     LOG_TICKET_UPDATED,
+    VALID_STATUS_TRANSITIONS,
     HistoryEvent,
     TicketStatus,
 )
@@ -12,6 +13,7 @@ from src.tickets.exceptions import (
     CustomerNotFoundError,
     InvalidCustomerRoleError,
     StatusChangeNotAllowedError,
+    InvalidStatusTransitionError,
     TicketNotFoundError,
 )
 from src.tickets.models import Ticket, TicketHistory
@@ -80,6 +82,9 @@ async def update_ticket(
     ticket = await repo.get(ticket_id)
     if not ticket:
         raise TicketNotFoundError()
+
+    if ticket.agent != current_user.id:
+        raise TicketNotAssignedError()
 
     status_changed = False
     if data.status is not None:
