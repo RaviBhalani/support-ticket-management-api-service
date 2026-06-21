@@ -4,13 +4,8 @@ import bcrypt
 import jwt
 
 from src.auth.constants import ACCESS_TOKEN_TYPE, ALGORITHM, REFRESH_TOKEN_TYPE
-from src.auth.exceptions import (
-    InvalidCredentialsError,
-    InvalidTokenError,
-    InvalidTokenTypeError,
-    RefreshTokenMissingError,
-    TokenExpiredError
-)
+from src.auth.exceptions import InvalidCredentialsError, InvalidTokenTypeError, RefreshTokenMissingError
+from src.auth.utils import decode_token
 from src.core.config import settings
 from src.users.models import User
 from src.users.repository import UserRepository
@@ -30,15 +25,6 @@ def create_refresh_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=settings.jwt.refresh_token_expire_days)
     payload = {"sub": str(user_id), "exp": expire, "type": REFRESH_TOKEN_TYPE}
     return jwt.encode(payload, settings.jwt.private_key, algorithm=ALGORITHM)
-
-
-def decode_token(token: str) -> dict:
-    try:
-        return jwt.decode(token, settings.jwt.public_key, algorithms=[ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        raise TokenExpiredError()
-    except jwt.InvalidTokenError:
-        raise InvalidTokenError()
 
 
 async def login_user(email: str, password: str, repo: UserRepository) -> tuple[User, str, str]:
