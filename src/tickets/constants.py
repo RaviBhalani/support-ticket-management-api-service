@@ -77,6 +77,7 @@ INVALID_CUSTOMER_ROLE_MSG = "The specified user is not a customer."
 TICKET_NOT_FOUND_MSG = "The specified ticket does not exist."
 TICKET_NOT_ASSIGNED_MSG = "You are not the assigned agent for this ticket."
 TICKET_ACCESS_DENIED_MSG = "You do not have permission to access this ticket."
+TICKET_LOCKED_MSG = "Ticket cannot be modified once it is resolved or closed."
 INVALID_STATUS_TRANSITION_MSG = "Invalid status transition."
 
 # Templates

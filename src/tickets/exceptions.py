@@ -6,6 +6,7 @@ from src.tickets.constants import (
     INVALID_CUSTOMER_ROLE_MSG,
     INVALID_STATUS_TRANSITION_MSG,
     TICKET_ACCESS_DENIED_MSG,
+    TICKET_LOCKED_MSG,
     TICKET_NOT_ASSIGNED_MSG,
     TICKET_NOT_FOUND_MSG,
 )
@@ -39,3 +40,8 @@ class InvalidStatusTransitionError(AppException):
 class TicketAccessDeniedError(AppException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = TICKET_ACCESS_DENIED_MSG
+
+
+class TicketLockedError(AppException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = TICKET_LOCKED_MSG

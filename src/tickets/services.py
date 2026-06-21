@@ -15,6 +15,7 @@ from src.tickets.exceptions import (
     InvalidCustomerRoleError,
     InvalidStatusTransitionError,
     TicketAccessDeniedError,
+    TicketLockedError,
     TicketNotAssignedError,
     TicketNotFoundError,
 )
@@ -110,6 +111,9 @@ async def update_ticket(
 
     if ticket.agent != current_user.id:
         raise TicketNotAssignedError()
+
+    if TicketStatus(ticket.status) in {TicketStatus.RESOLVED, TicketStatus.CLOSED}:
+        raise TicketLockedError()
 
     category_updated = False
     if data.category is not None:
