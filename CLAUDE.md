@@ -196,7 +196,7 @@ Key placement rules:
 - Register with `app.add_exception_handler(AppException, app_exception_handler)` in `main.py`.
 - Always use `starlette.status` constants (e.g. `status.HTTP_401_UNAUTHORIZED`), never raw integers.
 - Error message strings are constants in `src/{app}/constants.py`.
-- Use 409 Conflict (`status.HTTP_409_CONFLICT`) for operations blocked by the current resource state — e.g., attempting to modify a ticket that is already RESOLVED or CLOSED. 409 means "the request is valid but conflicts with the current state of the resource"; it is distinct from 422 (validation failure) and 403 (authorization denied).
+- Use 409 Conflict (`status.HTTP_409_CONFLICT`) for operations blocked by the current resource state — e.g., attempting to modify a ticket that is already RESOLVED or CLOSED, or attempting to delete a ticket that is not OPEN. 409 means "the request is valid but conflicts with the current state of the resource"; it is distinct from 422 (validation failure) and 403 (authorization denied).
 
 ### Authentication
 
