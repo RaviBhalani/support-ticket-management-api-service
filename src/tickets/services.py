@@ -1,10 +1,22 @@
 import structlog
 
-from src.tickets.constants import CATEGORY_PRIORITY_MAP, LOG_TICKET_CREATED, HistoryEvent, TicketStatus
-from src.tickets.exceptions import CustomerNotFoundError, InvalidCustomerRoleError
+from src.tickets.constants import (
+    CATEGORY_PRIORITY_MAP,
+    LOG_TICKET_CREATED,
+    LOG_TICKET_STATUS_CHANGED,
+    LOG_TICKET_UPDATED,
+    HistoryEvent,
+    TicketStatus,
+)
+from src.tickets.exceptions import (
+    CustomerNotFoundError,
+    InvalidCustomerRoleError,
+    StatusChangeNotAllowedError,
+    TicketNotFoundError,
+)
 from src.tickets.models import Ticket, TicketHistory
 from src.tickets.repository import TicketHistoryRepository, TicketRepository
-from src.tickets.schemas import CreateTicketRequest
+from src.tickets.schemas import CreateTicketRequest, UpdateTicketRequest
 from src.tickets.tasks import send_ticket_created_email
 from src.users.constants import UserRole
 from src.users.models import User
@@ -54,5 +66,45 @@ async def create_ticket(
     send_ticket_created_email.delay(ticket.id)
 
     logger.info(LOG_TICKET_CREATED, ticket_id=ticket.id, customer_id=ticket.customer)
+
+    return ticket
+
+
+async def update_ticket(
+    ticket_id: int,
+    repo: TicketRepository,
+    history_repo: TicketHistoryRepository,
+    current_user: User,
+    data: UpdateTicketRequest,
+) -> Ticket:
+    ticket = await repo.get(ticket_id)
+    if not ticket:
+        raise TicketNotFoundError()
+
+    status_changed = False
+    if data.status is not None:
+        if current_user.role == UserRole.CUSTOMER:
+            raise StatusChangeNotAllowedError()
+        if data.status.value != ticket.status:
+            ticket.status = data.status.value
+            status_changed = True
+
+    simple_updates = data.model_dump(exclude_unset=True, exclude={"status", "comments"})
+    for field, value in simple_updates.items():
+        setattr(ticket, field, value)
+
+    if simple_updates or status_changed:
+        await repo.flush()
+
+    if status_changed:
+        history = TicketHistory(
+            ticket=ticket.id,
+            event=HistoryEvent.STATUS_CHANGE.value,
+            comments=data.comments,
+        )
+        await history_repo.add(history)
+        logger.info(LOG_TICKET_STATUS_CHANGED, ticket_id=ticket.id, status=data.status.value)
+
+    logger.info(LOG_TICKET_UPDATED, ticket_id=ticket.id)
 
     return ticket
