@@ -6,6 +6,7 @@ from src.tickets.constants import (
     COMMENTS_MAX_LENGTH,
     DESCRIPTION_MAX_LENGTH,
     SUBJECT_MAX_LENGTH,
+    HistoryEvent,
     TicketCategory,
     TicketPriority,
     TicketStatus,
@@ -41,3 +42,21 @@ class TicketResponse(BaseModel):
 
 class AgentTicketResponse(TicketResponse):
     priority: TicketPriority
+
+
+class TicketHistoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    ticket: int
+    event: HistoryEvent
+    comments: str | None
+    created_ts: datetime
+
+
+class TicketDetailResponse(TicketResponse):
+    history: list[TicketHistoryResponse]
+
+
+class AgentTicketDetailResponse(AgentTicketResponse):
+    history: list[TicketHistoryResponse]
