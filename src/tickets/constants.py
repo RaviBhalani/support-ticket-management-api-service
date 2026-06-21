@@ -60,10 +60,13 @@ CATEGORY_PRIORITY_MAP: dict[TicketCategory, TicketPriority] = {
 
 # Endpoint paths
 CREATE_TICKET_ENDPOINT = ""
+UPDATE_TICKET_ENDPOINT = "/{ticket_id}"
 
 # Error messages
 CUSTOMER_NOT_FOUND_MSG = "The specified customer does not exist."
 INVALID_CUSTOMER_ROLE_MSG = "The specified user is not a customer."
+TICKET_NOT_FOUND_MSG = "The specified ticket does not exist."
+STATUS_CHANGE_NOT_ALLOWED_MSG = "Customers are not allowed to change ticket status."
 
 # Templates
 TICKET_CREATED_EMAIL_TEMPLATE = "ticket_created.html"
@@ -71,3 +74,5 @@ TICKET_CREATED_EMAIL_TEMPLATE = "ticket_created.html"
 # Log messages
 LOG_TICKET_CREATED = "ticket_created"
 LOG_TICKET_CREATED_EMAIL_SENT = "ticket_created_email_sent"
+LOG_TICKET_UPDATED = "ticket_updated"
+LOG_TICKET_STATUS_CHANGED = "ticket_status_changed"
