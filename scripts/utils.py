@@ -10,8 +10,11 @@ def setup_path() -> None:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
 def _load_env(path: str) -> None:
-    with open(path) as f:
+    with open(_PROJECT_ROOT / path) as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
