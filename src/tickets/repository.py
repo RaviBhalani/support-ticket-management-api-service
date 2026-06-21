@@ -1,16 +1,28 @@
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.repository import BaseRepository
 from src.tickets.models import Ticket, TicketHistory
+from src.tickets.schemas import TicketFilter
 from src.users.constants import UserRole
 from src.users.models import User
 
 
 class TicketRepository(BaseRepository[Ticket]):
-    
+
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(Ticket, session)
+
+    def list_query_for_user(
+        self,
+        user_id: int,
+        role: UserRole,
+        ticket_filter: TicketFilter,
+    ) -> Select:
+        column = Ticket.agent if role == UserRole.AGENT else Ticket.customer
+        stmt = select(Ticket).where(column == user_id)
+        stmt = ticket_filter.filter(stmt)
+        return stmt.order_by(Ticket.created_ts.desc())
 
     async def get_agent_with_fewest_tickets(self) -> int:
         counts_sq = (
