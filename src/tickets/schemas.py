@@ -20,8 +20,6 @@ class CreateTicketRequest(BaseModel):
 
 
 class UpdateTicketRequest(BaseModel):
-    subject: str | None = Field(default=None, max_length=SUBJECT_MAX_LENGTH)
-    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH)
     category: TicketCategory | None = None
     status: TicketStatus | None = None
     comments: str | None = Field(default=None, max_length=COMMENTS_MAX_LENGTH)
