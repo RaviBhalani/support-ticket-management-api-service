@@ -70,3 +70,4 @@ TICKET_CREATED_EMAIL_TEMPLATE = "ticket_created.html"
 
 # Log messages
 LOG_TICKET_CREATED = "ticket_created"
+LOG_TICKET_CREATED_EMAIL_SENT = "ticket_created_email_sent"
