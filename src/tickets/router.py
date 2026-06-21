@@ -1,27 +1,47 @@
 from fastapi import APIRouter, Depends, status
+from fastapi_filter import FilterDepends
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 from src.auth.dependencies import require_agent, require_authentication
 from src.tickets import services as ticket_service
-from src.tickets.constants import CREATE_TICKET_ENDPOINT, GET_TICKET_ENDPOINT, UPDATE_TICKET_ENDPOINT
-from src.tickets.dependencies import get_ticket_history_repository, get_ticket_repository
-from src.tickets.repository import TicketHistoryRepository, TicketRepository
+from src.tickets.constants import (
+    CREATE_TICKET_ENDPOINT,
+    GET_TICKET_ENDPOINT,
+    LIST_TICKETS_ENDPOINT,
+    UPDATE_TICKET_ENDPOINT,
+)
 from src.tickets.dependencies import TicketDependencies
 from src.tickets.schemas import (
     AgentTicketDetailResponse,
     AgentTicketResponse,
     CreateTicketRequest,
     TicketDetailResponse,
-    TicketHistoryResponse,
+    TicketFilter,
     TicketResponse,
-    TicketUserResponse,
     UpdateTicketRequest,
 )
 from src.users.constants import UserRole
-from src.users.dependencies import get_user_repository
 from src.users.models import User
-from src.users.repository import UserRepository
 
 router = APIRouter()
+
+
+@router.get(LIST_TICKETS_ENDPOINT, status_code=status.HTTP_200_OK)
+async def list_tickets(
+    ticket_filter: TicketFilter = FilterDepends(TicketFilter),
+    params: Params = Depends(),
+    current_user: User = Depends(require_authentication),
+    deps: TicketDependencies = Depends(),
+) -> Page[AgentTicketResponse] | Page[TicketResponse]:
+    query = ticket_service.list_tickets(deps.repo, current_user, ticket_filter)
+    schema = AgentTicketResponse if current_user.role == UserRole.AGENT else TicketResponse
+    return await paginate(
+        deps.session,
+        query,
+        params=params,
+        transformer=lambda items: [schema.model_validate(t) for t in items],
+    )
 
 
 @router.post(CREATE_TICKET_ENDPOINT, status_code=status.HTTP_201_CREATED)
