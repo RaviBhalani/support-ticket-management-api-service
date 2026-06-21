@@ -1,7 +1,7 @@
 from fastapi import Cookie, Depends
 
 from src.auth.constants import ACCESS_TOKEN_COOKIE, ACCESS_TOKEN_TYPE
-from src.auth.exceptions import AgentRequiredError, InvalidCredentialsError, InvalidTokenTypeError
+from src.auth.exceptions import AgentRequiredError, CustomerRequiredError, InvalidCredentialsError, InvalidTokenTypeError
 from src.auth.utils import decode_token
 from src.core.config import settings
 from src.core.constants import Environment
@@ -35,4 +35,10 @@ async def require_authentication(current_user: User = Depends(get_current_user))
 async def require_agent(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != UserRole.AGENT:
         raise AgentRequiredError()
+    return current_user
+
+
+async def require_customer(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.CUSTOMER:
+        raise CustomerRequiredError()
     return current_user

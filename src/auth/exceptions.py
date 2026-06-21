@@ -2,6 +2,7 @@ from starlette import status
 
 from src.auth.constants import (
     AGENT_REQUIRED_MSG,
+    CUSTOMER_REQUIRED_MSG,
     INVALID_CREDENTIALS_MSG,
     INVALID_TOKEN_MSG,
     INVALID_TOKEN_TYPE_MSG,
@@ -39,3 +40,8 @@ class InvalidTokenTypeError(AppException):
 class AgentRequiredError(AppException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = AGENT_REQUIRED_MSG
+
+
+class CustomerRequiredError(AppException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = CUSTOMER_REQUIRED_MSG
