@@ -68,6 +68,7 @@ VALID_STATUS_TRANSITIONS: dict[TicketStatus, frozenset[TicketStatus]] = {
 
 # Endpoint paths
 CREATE_TICKET_ENDPOINT = ""
+GET_TICKET_ENDPOINT = "/{ticket_id}"
 UPDATE_TICKET_ENDPOINT = "/{ticket_id}"
 
 # Error messages
@@ -75,6 +76,7 @@ CUSTOMER_NOT_FOUND_MSG = "The specified customer does not exist."
 INVALID_CUSTOMER_ROLE_MSG = "The specified user is not a customer."
 TICKET_NOT_FOUND_MSG = "The specified ticket does not exist."
 TICKET_NOT_ASSIGNED_MSG = "You are not the assigned agent for this ticket."
+TICKET_ACCESS_DENIED_MSG = "You do not have permission to access this ticket."
 INVALID_STATUS_TRANSITION_MSG = "Invalid status transition."
 
 # Templates
@@ -83,5 +85,6 @@ TICKET_CREATED_EMAIL_TEMPLATE = "ticket_created.html"
 # Log messages
 LOG_TICKET_CREATED = "ticket_created"
 LOG_TICKET_CREATED_EMAIL_SENT = "ticket_created_email_sent"
+LOG_TICKET_RETRIEVED = "ticket_retrieved"
 LOG_TICKET_UPDATED = "ticket_updated"
 LOG_TICKET_STATUS_CHANGED = "ticket_status_changed"
