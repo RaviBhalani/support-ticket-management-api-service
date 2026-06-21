@@ -95,6 +95,7 @@ async def update_ticket(
 
     if simple_updates or status_changed:
         await repo.flush()
+        await repo.refresh(ticket)
 
     if status_changed:
         history = TicketHistory(
