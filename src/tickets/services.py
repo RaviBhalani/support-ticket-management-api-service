@@ -1,5 +1,7 @@
 import structlog
 
+from sqlalchemy import Select
+
 from src.tickets.constants import (
     CATEGORY_PRIORITY_MAP,
     LOG_TICKET_CREATED,
@@ -21,13 +23,21 @@ from src.tickets.exceptions import (
 )
 from src.tickets.models import Ticket, TicketHistory
 from src.tickets.repository import TicketHistoryRepository, TicketRepository
-from src.tickets.schemas import CreateTicketRequest, UpdateTicketRequest
+from src.tickets.schemas import CreateTicketRequest, TicketFilter, UpdateTicketRequest
 from src.tickets.tasks import send_ticket_created_email
 from src.users.constants import UserRole
 from src.users.models import User
 from src.users.repository import UserRepository
 
 logger = structlog.get_logger(__name__)
+
+
+def list_tickets(
+    repo: TicketRepository,
+    current_user: User,
+    ticket_filter: TicketFilter,
+) -> Select:
+    return repo.list_query_for_user(current_user.id, current_user.role, ticket_filter)
 
 
 async def create_ticket(
