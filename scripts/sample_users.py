@@ -28,9 +28,11 @@ def _print_section(title: str, users: list[User]) -> None:
     print(_THICK)
     print(f"  {title} ({len(users)})")
     print(_THICK)
+    print(f"        {'user_id':<9}  {'name':<24}  email")
+    print(_THIN)
     for i, user in enumerate(users, start=1):
         name = f"{user.first_name} {user.last_name}"
-        print(f"  {i:>2}.  {name:<24}  {user.email}")
+        print(f"  {i:>2}.  {user.id:<9}  {name:<24}  {user.email}")
     print()
 
 
