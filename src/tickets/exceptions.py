@@ -5,7 +5,7 @@ from src.tickets.constants import CUSTOMER_NOT_FOUND_MSG, INVALID_CUSTOMER_ROLE_
 
 
 class CustomerNotFoundError(AppException):
-    status_code = status.HTTP_404_NOT_FOUND
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     detail = CUSTOMER_NOT_FOUND_MSG
 
 
