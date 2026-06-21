@@ -13,6 +13,16 @@ sleep 30
 echo "==> Running migrations..."
 docker compose -f docker-compose.local.yaml --env-file .envs/local.env exec server alembic upgrade head
 
+echo "==> Creating virtual environment..."
+python -m venv .venv
+
+echo "==> Installing dependencies..."
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+  .venv/Scripts/pip install -r requirements/local.txt
+else
+  .venv/bin/pip install -r requirements/local.txt
+fi
+
 echo "==> Seeding database..."
 cd scripts
 python seed.py
