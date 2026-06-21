@@ -137,6 +137,8 @@ Each domain lives under `src/{app}/` and follows this file layout:
 
 `src/users/` and `src/auth/` are reference implementations.
 
+When a detail endpoint must return related entity data (not raw FK ids), define a compact summary schema (e.g., `TicketUserResponse` with `id`, `first_name`, `last_name`, `email`) and override the FK field in the detail response schema with the summary type (`customer: TicketUserResponse | None`). The service fetches the related objects and returns them alongside the main entity (as extra tuple elements). The router constructs the response with `model_dump(exclude={"related_field_name"})` to drop the raw integer FK before merging in the validated summary objects via `**detail_fields`.
+
 ### Layer Separation
 
 Enforce strict separation between layers. Each layer has one responsibility and prohibited imports:
@@ -162,6 +164,7 @@ Key placement rules:
 - Register with `app.add_exception_handler(AppException, app_exception_handler)` in `main.py`.
 - Always use `starlette.status` constants (e.g. `status.HTTP_401_UNAUTHORIZED`), never raw integers.
 - Error message strings are constants in `src/{app}/constants.py`.
+- Use 409 Conflict (`status.HTTP_409_CONFLICT`) for operations blocked by the current resource state — e.g., attempting to modify a ticket that is already RESOLVED or CLOSED. 409 means "the request is valid but conflicts with the current state of the resource"; it is distinct from 422 (validation failure) and 403 (authorization denied).
 
 ### Authentication
 
