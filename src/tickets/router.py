@@ -35,8 +35,6 @@ async def update_ticket(
     current_user: User = Depends(require_agent),
     repo: TicketRepository = Depends(get_ticket_repository),
     history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
-) -> AgentTicketResponse | TicketResponse:
+) -> AgentTicketResponse:
     ticket = await ticket_service.update_ticket(ticket_id, repo, history_repo, current_user, body)
-    if current_user.role == UserRole.AGENT:
-        return AgentTicketResponse.model_validate(ticket)
-    return TicketResponse.model_validate(ticket)
+    return AgentTicketResponse.model_validate(ticket)
