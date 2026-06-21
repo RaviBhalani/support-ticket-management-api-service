@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import ClassVar, Self
 
+from fastapi_filter.contrib.sqlalchemy import Filter
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.tickets.constants import (
@@ -14,6 +15,15 @@ from src.tickets.constants import (
 )
 from src.tickets.models import Ticket, TicketHistory
 from src.users.models import User
+
+
+class TicketFilter(Filter):
+    status__in: list[TicketStatus] | None = None
+    category__in: list[TicketCategory] | None = None
+    priority__in: list[TicketPriority] | None = None
+
+    class Constants(Filter.Constants):
+        model = Ticket
 
 
 class CreateTicketRequest(BaseModel):
