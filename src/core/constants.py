@@ -61,6 +61,12 @@ TIMEZONE_UTC = "UTC"
 ON_DELETE_SET_NULL = "SET NULL"
 ON_DELETE_CASCADE = "CASCADE"
 
+# Templates
+TEMPLATES_DIR = "templates"
+
+# Display formats
+DATETIME_DISPLAY_FORMAT = "%d %b %Y, %H:%M UTC"
+
 # Application messages
 DEFAULT_ERROR_MSG = "An unexpected error occurred."
 APP_STARTUP_MSG = "Starting up"
