@@ -56,6 +56,10 @@ JWT_DEFAULT_REFRESH_TOKEN_EXPIRE_DAYS = 7
 SERIALIZER_JSON = "json"
 TIMEZONE_UTC = "UTC"
 
+# Database — ON DELETE actions
+ON_DELETE_SET_NULL = "SET NULL"
+ON_DELETE_CASCADE = "CASCADE"
+
 # Application messages
 DEFAULT_ERROR_MSG = "An unexpected error occurred."
 APP_STARTUP_MSG = "Starting up"
