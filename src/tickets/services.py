@@ -12,8 +12,8 @@ from src.tickets.constants import (
 from src.tickets.exceptions import (
     CustomerNotFoundError,
     InvalidCustomerRoleError,
-    StatusChangeNotAllowedError,
     InvalidStatusTransitionError,
+    TicketNotAssignedError,
     TicketNotFoundError,
 )
 from src.tickets.models import Ticket, TicketHistory
@@ -86,6 +86,12 @@ async def update_ticket(
     if ticket.agent != current_user.id:
         raise TicketNotAssignedError()
 
+    category_updated = False
+    if data.category is not None:
+        ticket.category = data.category.value
+        ticket.priority = CATEGORY_PRIORITY_MAP[data.category].value
+        category_updated = True
+
     status_changed = False
     if data.status is not None:
         current_status = TicketStatus(ticket.status)
@@ -99,7 +105,7 @@ async def update_ticket(
     for field, value in simple_updates.items():
         setattr(ticket, field, value)
 
-    if simple_updates or status_changed:
+    if simple_updates or category_updated or status_changed:
         await repo.flush()
         await repo.refresh(ticket)
 
