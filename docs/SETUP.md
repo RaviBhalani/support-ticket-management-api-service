@@ -42,6 +42,8 @@ Then run the one-command setup script:
 
 This single script tears down any existing containers, rebuilds images, starts all four services, waits for PostgreSQL to be ready, applies all migrations, creates a local virtual environment, installs Python dependencies, and seeds the database with sample agents and customers.
 
+> **Once complete, the script prints a sample of 5 agents and 20 customers to the terminal — not the full set of 100 agents and 10 000 customers. Use any of those credentials to log in and test the API. The password for every seeded user follows the format `firstname_lastname` in lowercase (e.g. a user named John Smith has password `john_smith`).**
+
 ---
 
 ## Normal Local Setup
