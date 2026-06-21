@@ -1,6 +1,12 @@
 from starlette import status
 
-from src.auth.constants import INVALID_CREDENTIALS_MSG, INVALID_TOKEN_MSG, INVALID_TOKEN_TYPE_MSG, REFRESH_TOKEN_MISSING_MSG, TOKEN_EXPIRED_MSG
+from src.auth.constants import (
+    INVALID_CREDENTIALS_MSG,
+    INVALID_TOKEN_MSG,
+    INVALID_TOKEN_TYPE_MSG,
+    REFRESH_TOKEN_MISSING_MSG,
+    TOKEN_EXPIRED_MSG,
+)
 from src.core.exceptions import AppException
 
 

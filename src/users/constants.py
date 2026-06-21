@@ -2,6 +2,7 @@ from enum import Enum
 
 # Table
 TABLE_NAME = "users"
+USER_FK = f"{TABLE_NAME}.id"
 
 # Roles
 class UserRole(str, Enum):
