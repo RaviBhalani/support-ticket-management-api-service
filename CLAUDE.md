@@ -48,6 +48,7 @@ Each compose file defines four services: `server`, `celery`, `postgres`, `redis`
 | Roll back last migration (inside Docker) | `make downgrade` |
 | Run dev server (outside Docker) | `uvicorn src.main:app --reload` |
 | Run Celery worker (outside Docker) | `celery -A src.core.celery worker --loglevel=info` |
+| Seed database with agents + customers | `make seed` |
 
 No test suite exists yet. Commands will be added once `tests/` is established.
 
@@ -78,12 +79,31 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`.
 - Repository methods use `session.flush()`, not `session.commit()`. `get_session` commits on success and rolls back on exception — never call `session.commit()` in a repo or service.
 - When adding a new domain's ORM models, import the models module in `alembic/env.py`: `from src.{app} import models as _  # noqa: F401`. Without this, `--autogenerate` produces an empty migration.
+- FK references use constants: define `<ENTITY>_FK = f"{TABLE_NAME}.id"` in `src/{app}/constants.py` (e.g., `USER_FK = f"{TABLE_NAME}.id"` in `src/users/constants.py`). Import this constant in any model that references the entity as a foreign key — never hardcode `"users.id"` inside a model file.
+- `ON_DELETE_SET_NULL` and `ON_DELETE_CASCADE` are string constants in `src/core/constants.py`. Always import and pass them to `ForeignKey(..., ondelete=ON_DELETE_CASCADE)` — never hardcode the string.
+- Two reusable timestamp mixins live in `src/core/mixins.py` (both declare `__abstract__ = True`):
+  - `CreatedAtMixin`: adds `created_ts: Mapped[datetime]` with `server_default=func.now()`.
+  - `TimestampMixin(CreatedAtMixin)`: inherits `created_ts` and adds `modified_ts: Mapped[datetime]` with `server_default=func.now(), onupdate=func.now()`.
+  - Use `TimestampMixin` for entities that track both creation and last-modified time. Use `CreatedAtMixin` for append-only records (e.g., history entries).
+- `sync_session_factory` in `src.core.database`: a synchronous `sessionmaker` for use inside Celery tasks (which run synchronously). Use with `with sync_session_factory() as session:`. Never use `async_session_factory` in a Celery task.
 
 ### Celery
 
 - The Celery app instance is at `src.core.celery:app`.
 - All tasks use JSON serialization and UTC timezone (configured in `src/core/celery.py` — do not override per-task).
 - Place tasks in `src/{app}/tasks.py` within the relevant domain app.
+- Celery tasks that need DB access must use `sync_session_factory` from `src.core.database` — Celery workers run synchronously, not in an async event loop.
+- Email templates: place HTML files in `src/{app}/templates/`. Load with `read_template(__file__, template_name)` from `src.core.utils`. Use `str.replace("{{placeholder}}", value)` chains for substitution. Use `DATETIME_DISPLAY_FORMAT` from `src.core.constants` to format `datetime` values for display.
+
+### Scripts
+
+- Standalone scripts live in `scripts/` at the project root, parallel to `alembic/` and `src/`.
+- `scripts/utils.py` provides shared bootstrap for all scripts:
+  - `setup_path()` — inserts the project root into `sys.path` so `src.*` imports resolve.
+  - `load_envs()` — loads `.envs/local/api.env` and `.envs/local/db.env` into `os.environ`.
+  - `run_async(coro)` — wraps `asyncio.run()` with an explicit `SelectorEventLoop`. Required on Windows because the default `ProactorEventLoop` is incompatible with psycopg async.
+- Every script must call `utils.setup_path()` and `utils.load_envs()` **before** any `src.*` import.
+- Scripts call `await session.commit()` directly — they are not bound by the repo flush-only contract.
 
 ### Constants
 
@@ -154,6 +174,10 @@ Key placement rules:
 - `CookieSameSite` is a `(str, Enum)` — consistent with `UserRole` and `Environment`.
 - Use `LoginResponse.model_validate(orm_instance)` with `model_config = ConfigDict(from_attributes=True)` in response schemas instead of manually mapping ORM fields.
 - `decode_token` stays as a standalone function, separate from `refresh_access_token` — it is a reusable cryptographic primitive that future token-authenticated endpoints (e.g. `GET /me`) will call directly.
+- Auth dependencies in `src/auth/dependencies.py`:
+  - `get_current_user` — reads the `access_token` cookie, calls `decode_token`, validates token type is `"access"`, fetches the user by id. Raises `InvalidTokenTypeError` or `InvalidCredentialsError` as appropriate.
+  - `require_authentication` — pure pass-through alias for `get_current_user`; makes intent explicit in router signatures for any-role endpoints.
+  - `require_agent` / `require_customer` — check `current_user.role` and raise `AgentRequiredError` (403) or `CustomerRequiredError` (403). Message constants `AGENT_REQUIRED_MSG` / `CUSTOMER_REQUIRED_MSG` live in `src/auth/constants.py`; the exceptions live in `src/auth/exceptions.py`.
 
 ### API
 
