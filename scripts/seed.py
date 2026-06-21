@@ -59,7 +59,10 @@ async def main() -> None:
     Faker.seed(0)  # Fixed seed — reproducible data across runs
     fake = Faker()
 
+    print(f"Generating {_AGENT_COUNT} agents...")
     agents = [_build_user(fake, i, UserRole.AGENT) for i in range(_AGENT_COUNT)]
+
+    print(f"Generating {_CUSTOMER_COUNT} customers...")
     customers = [_build_user(fake, i, UserRole.CUSTOMER) for i in range(_CUSTOMER_COUNT)]
 
     db_url = (
@@ -70,12 +73,13 @@ async def main() -> None:
     engine = create_async_engine(db_url)
     factory = async_sessionmaker(engine, expire_on_commit=False)
 
+    print("Inserting into database...")
     async with factory() as session:
         session.add_all(agents + customers)
         await session.commit()
 
     await engine.dispose()
-    print(f"Seeded {len(agents)} agents and {len(customers)} customers.")
+    print(f"Done — seeded {len(agents)} agents and {len(customers)} customers.")
 
 
 if __name__ == "__main__":
