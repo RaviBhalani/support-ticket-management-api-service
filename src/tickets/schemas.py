@@ -54,9 +54,22 @@ class TicketHistoryResponse(BaseModel):
     created_ts: datetime
 
 
+class TicketUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    first_name: str
+    last_name: str
+    email: str
+
+
 class TicketDetailResponse(TicketResponse):
+    customer: TicketUserResponse | None
+    agent: TicketUserResponse | None
     history: list[TicketHistoryResponse]
 
 
 class AgentTicketDetailResponse(AgentTicketResponse):
+    customer: TicketUserResponse | None
+    agent: TicketUserResponse | None
     history: list[TicketHistoryResponse]

@@ -12,6 +12,7 @@ from src.tickets.schemas import (
     TicketDetailResponse,
     TicketHistoryResponse,
     TicketResponse,
+    TicketUserResponse,
     UpdateTicketRequest,
 )
 from src.users.constants import UserRole
@@ -42,16 +43,27 @@ async def get_ticket(
     current_user: User = Depends(require_authentication),
     repo: TicketRepository = Depends(get_ticket_repository),
     history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
+    user_repo: UserRepository = Depends(get_user_repository),
 ) -> AgentTicketDetailResponse | TicketDetailResponse:
-    ticket, history = await ticket_service.get_ticket(ticket_id, repo, history_repo, current_user)
+
+    ticket, history, customer_user, agent_user = await ticket_service.get_ticket(
+        ticket_id, repo, history_repo, user_repo, current_user
+    )
     history_out = [TicketHistoryResponse.model_validate(h) for h in history]
+    customer_out = TicketUserResponse.model_validate(customer_user) if customer_user else None
+    agent_out = TicketUserResponse.model_validate(agent_user) if agent_user else None
+
     if current_user.role == UserRole.AGENT:
         return AgentTicketDetailResponse(
-            **AgentTicketResponse.model_validate(ticket).model_dump(),
+            **AgentTicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
+            customer=customer_out,
+            agent=agent_out,
             history=history_out,
         )
     return TicketDetailResponse(
-        **TicketResponse.model_validate(ticket).model_dump(),
+        **TicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
+        customer=customer_out,
+        agent=agent_out,
         history=history_out,
     )
 

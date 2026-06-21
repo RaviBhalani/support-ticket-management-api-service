@@ -79,8 +79,9 @@ async def get_ticket(
     ticket_id: int,
     repo: TicketRepository,
     history_repo: TicketHistoryRepository,
+    user_repo: UserRepository,
     current_user: User,
-) -> tuple[Ticket, list[TicketHistory]]:
+) -> tuple[Ticket, list[TicketHistory], User | None, User | None]:
     ticket = await repo.get(ticket_id)
     if not ticket:
         raise TicketNotFoundError()
@@ -92,10 +93,12 @@ async def get_ticket(
         raise TicketAccessDeniedError()
 
     history = await history_repo.list_by_ticket(ticket_id)
+    customer_user = await user_repo.get(ticket.customer) if ticket.customer else None
+    agent_user = await user_repo.get(ticket.agent) if ticket.agent else None
 
     logger.info(LOG_TICKET_RETRIEVED, ticket_id=ticket.id)
 
-    return ticket, history
+    return ticket, history, customer_user, agent_user
 
 
 async def update_ticket(
