@@ -3,10 +3,11 @@ from fastapi_filter import FilterDepends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from src.auth.dependencies import require_agent, require_authentication
+from src.auth.dependencies import require_agent, require_authentication, require_customer
 from src.tickets import services as ticket_service
 from src.tickets.constants import (
     CREATE_TICKET_ENDPOINT,
+    DELETE_TICKET_ENDPOINT,
     GET_TICKET_ENDPOINT,
     LIST_TICKETS_ENDPOINT,
     UPDATE_TICKET_ENDPOINT,
@@ -79,3 +80,12 @@ async def update_ticket(
 ) -> AgentTicketResponse:
     ticket = await ticket_service.update_ticket(ticket_id, deps.repo, deps.history_repo, current_user, body)
     return AgentTicketResponse.model_validate(ticket)
+
+
+@router.delete(DELETE_TICKET_ENDPOINT, status_code=status.HTTP_204_NO_CONTENT)
+async def delete_ticket(
+    ticket_id: int,
+    current_user: User = Depends(require_customer),
+    deps: TicketDependencies = Depends(),
+) -> None:
+    await ticket_service.delete_ticket(ticket_id, deps.repo, current_user)
