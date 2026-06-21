@@ -37,3 +37,11 @@ class TicketHistoryRepository(BaseRepository[TicketHistory]):
 
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(TicketHistory, session)
+
+    async def list_by_ticket(self, ticket_id: int) -> list[TicketHistory]:
+        result = await self._session.execute(
+            select(TicketHistory)
+            .where(TicketHistory.ticket == ticket_id)
+            .order_by(TicketHistory.created_ts)
+        )
+        return list(result.scalars().all())
