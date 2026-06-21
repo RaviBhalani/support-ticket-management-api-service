@@ -1,0 +1,603 @@
+{
+  "info": {
+    "_postman_id": "32f1640f-13b1-4268-98e1-1680b4ed2619",
+    "name": "Support Ticket Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53748884",
+    "_collection_link": "https://go.postman.co/collection/53748884-32f1640f-13b1-4268-98e1-1680b4ed2619?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"matthew.moore.7067@example.com\",\r\n    \"password\": \"matthew_moore\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/auth/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"ravibhalani8@gmail.com\",\r\n    \"password\": \"ravibhalani8\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/auth/login",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sat, 20 Jun 2026 17:33:02 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "98"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "set-cookie",
+                  "value": "access_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgxOTc3Njg0LCJ0eXBlIjoiYWNjZXNzIn0.AcGdY1cC7jpn-SyWdOSoZ0b5vNVEtauOsiTU3-PQLzgoQmewXZvkx-2LZe0Og47XqhexDL-_dYDMyv3XBZgfSOc48FG7Ge_W5XXliIntYnUFVBkT-byI7FkmfitPOE_A-EWkFnL-XTdGtV2cfWGXPPpElmnzcaQRix_2_QLbXsc; HttpOnly; Path=/; SameSite=strict"
+                },
+                {
+                  "key": "set-cookie",
+                  "value": "refresh_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgyNTgxNTg0LCJ0eXBlIjoicmVmcmVzaCJ9.Aw7m-w4wsKlOxyP79riGMqOhFQVLR-9otWUbuSrlrz644TCqVvePhaHtkdjdRSEffz1DwS7RQuC7bbDBhl9UNa9jKoUdLjmHQ-e4Jna41o1C9RjVZUglsd6jp5ay6ZR9LJG6MrxwfmIGkAykD4A6E8kCyCIqDiOAYGWWVWecX9E; HttpOnly; Path=/api/v1/auth/refresh; SameSite=strict"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 1,\n    \"email\": \"ravibhalani8@gmail.com\",\n    \"first_name\": \"Ravi\",\n    \"last_name\": \"Bhalani\",\n    \"role\": \"agent\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/auth/refresh",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Refresh Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/auth/refresh",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sat, 20 Jun 2026 17:40:43 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "set-cookie",
+                  "value": "access_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgxOTc4MTQzLCJ0eXBlIjoiYWNjZXNzIn0.K7krZ5EFRxf5dVpiRB4f0yd19d8E1urLEKPgTj0aPtu5lxTVFDmLwxk7PLFNg4CF-wBCtsI4savDcU4BWWqFAZ92VCj2J1mRfPeqOGX7IWL5j_sRfGWdAUCgIdc91031W6oiL482H9Fk368apBgmKF40IFQ5alPZXa2w4oxEoo0; HttpOnly; Path=/; SameSite=strict"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ticket",
+      "item": [
+        {
+          "name": "List Tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/tickets?page=1&size=10&status__in=IN_PROGRESS,CLOSED&category__in=PAYMENTS,OTHER&priority__in=CRITICAL,HIGH,MEDIUM,LOW",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Optional. Default: 1"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Optional. Default: 50"
+                },
+                {
+                  "key": "status__in",
+                  "value": "IN_PROGRESS,CLOSED",
+                  "description": "Optional. Values: OPEN, IN_PROGRESS, RESOLVED, CLOSED"
+                },
+                {
+                  "key": "category__in",
+                  "value": "PAYMENTS,OTHER",
+                  "description": "Optional. Values: ACCOUNT, PAYMENTS, APP_ISSUE, SUGGESTION, OTHER"
+                },
+                {
+                  "key": "priority__in",
+                  "value": "CRITICAL,HIGH,MEDIUM,LOW",
+                  "description": "Optional. Values: LOW, MEDIUM, HIGH, CRITICAL"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl --request GET --url '{{url}}/{{v1_prefix}}/tickets'"
+          },
+          "response": [
+            {
+              "name": "List Tickets",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/tickets?page=1&size=10&status__in=IN_PROGRESS,CLOSED&category__in=PAYMENTS,OTHER&priority__in=CRITICAL,HIGH,MEDIUM,LOW",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "tickets"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Optional. Default: 1"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10",
+                      "description": "Optional. Default: 50"
+                    },
+                    {
+                      "key": "status__in",
+                      "value": "IN_PROGRESS,CLOSED",
+                      "description": "Optional. Values: OPEN, IN_PROGRESS, RESOLVED, CLOSED"
+                    },
+                    {
+                      "key": "category__in",
+                      "value": "PAYMENTS,OTHER",
+                      "description": "Optional. Values: ACCOUNT, PAYMENTS, APP_ISSUE, SUGGESTION, OTHER"
+                    },
+                    {
+                      "key": "priority__in",
+                      "value": "CRITICAL,HIGH,MEDIUM,LOW",
+                      "description": "Optional. Values: LOW, MEDIUM, HIGH, CRITICAL"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sun, 21 Jun 2026 20:02:15 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "831"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"items\": [\n        {\n            \"id\": 5,\n            \"customer\": 7169,\n            \"agent\": 59,\n            \"subject\": \"Ticket Subject - matthew.moore - ticket\",\n            \"description\": \"Ticket Description - matthew.moore - ticket\",\n            \"category\": \"PAYMENTS\",\n            \"status\": \"IN_PROGRESS\",\n            \"created_ts\": \"2026-06-21T19:15:02.622081\",\n            \"modified_ts\": \"2026-06-21T19:15:59.815347\"\n        },\n        {\n            \"id\": 4,\n            \"customer\": 7169,\n            \"agent\": 50,\n            \"subject\": \"Ticket Subject\",\n            \"description\": \"Ticket Description\",\n            \"category\": \"OTHER\",\n            \"status\": \"CLOSED\",\n            \"created_ts\": \"2026-06-21T16:52:08.984823\",\n            \"modified_ts\": \"2026-06-21T18:10:03.863032\"\n        },\n        {\n            \"id\": 2,\n            \"customer\": 7169,\n            \"agent\": 75,\n            \"subject\": \"Ticket Subject - matthew.moore - ticket - 1\",\n            \"description\": \"Ticket Description - matthew.moore - ticket - 1\",\n            \"category\": \"OTHER\",\n            \"status\": \"IN_PROGRESS\",\n            \"created_ts\": \"2026-06-21T15:50:19.403756\",\n            \"modified_ts\": \"2026-06-21T18:22:47.433226\"\n        }\n    ],\n    \"total\": 3,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Ticket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/tickets/2",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "tickets",
+                "2"
+              ]
+            },
+            "description": "Generated from cURL: curl --request GET --url '{{url}}/{{v1_prefix}}/tickets/{{ticketId}}'"
+          },
+          "response": [
+            {
+              "name": "Get Ticket",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/tickets/2",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "tickets",
+                    "2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sun, 21 Jun 2026 18:23:27 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "698"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"id\": 2,\n    \"customer\": {\n        \"id\": 7169,\n        \"first_name\": \"Matthew\",\n        \"last_name\": \"Moore\",\n        \"email\": \"matthew.moore.7067@example.com\"\n    },\n    \"agent\": {\n        \"id\": 75,\n        \"first_name\": \"Jessica\",\n        \"last_name\": \"Massey\",\n        \"email\": \"jessica.massey.73@example.com\"\n    },\n    \"subject\": \"Ticket Subject - matthew.moore - ticket - 1\",\n    \"description\": \"Ticket Description - matthew.moore - ticket - 1\",\n    \"category\": \"OTHER\",\n    \"status\": \"IN_PROGRESS\",\n    \"created_ts\": \"2026-06-21T15:50:19.403756\",\n    \"modified_ts\": \"2026-06-21T18:22:47.433226\",\n    \"priority\": \"LOW\",\n    \"history\": [\n        {\n            \"id\": 2,\n            \"ticket\": 2,\n            \"event\": \"CREATION\",\n            \"comments\": null,\n            \"created_ts\": \"2026-06-21T15:50:19.403756\"\n        },\n        {\n            \"id\": 8,\n            \"ticket\": 2,\n            \"event\": \"STATUS_CHANGE\",\n            \"comments\": \"Comments\",\n            \"created_ts\": \"2026-06-21T18:22:47.433226\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"customer_id\": 7169,\r\n    \"subject\": \"Ticket Subject - matthew.moore - ticket\",\r\n    \"description\": \"Ticket Description - matthew.moore - ticket\",\r\n    \"category\": \"PAYMENTS\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/tickets",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "tickets"
+              ]
+            },
+            "description": "Generated from cURL: curl --request POST --url '{{url}}/{{v1_prefix}}/tickets' --data-raw '{\n    \"title\": \"Payment issue\",\n    \"description\": \"Customer is unable to complete payment\",\n    \"status\": \"open\",\n    \"priority\": \"high\"\n}'"
+          },
+          "response": [
+            {
+              "name": "Create Ticket",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    // \"customer\": 1,\r\n    \"subject\": \"Ticket Subject - nicholas.garza\",\r\n    \"description\": \"Ticket Description - nicholas.garza\",\r\n    \"category\": \"ACCOUNT\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/tickets",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "tickets"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sun, 21 Jun 2026 15:27:00 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "253"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"id\": 1,\n    \"customer\": 9555,\n    \"agent\": 26,\n    \"subject\": \"Ticket Subject - nicholas.garza\",\n    \"description\": \"Ticket Description - nicholas.garza\",\n    \"category\": \"ACCOUNT\",\n    \"status\": \"OPEN\",\n    \"created_ts\": \"2026-06-21T15:27:00.578786\",\n    \"modified_ts\": \"2026-06-21T15:27:00.578786\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Ticket",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"category\": \"OTHER\",\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"comments\": \"Comments\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/tickets/2",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "tickets",
+                "2"
+              ]
+            },
+            "description": "Generated from cURL: curl --request PUT --url '{{url}}/{{v1_prefix}}/tickets/{{ticketId}}' --data-raw '{\n    \"title\": \"Payment issue\",\n    \"description\": \"Customer is unable to complete payment after retry\",\n    \"status\": \"in_progress\",\n    \"priority\": \"medium\"\n}'"
+          },
+          "response": [
+            {
+              "name": "Update Ticket",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"category\": \"OTHER\",\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"comments\": \"Comments\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/tickets/2",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "tickets",
+                    "2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sun, 21 Jun 2026 18:22:46 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "content-length",
+                  "value": "299"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": "{\n    \"id\": 2,\n    \"customer\": 7169,\n    \"agent\": 75,\n    \"subject\": \"Ticket Subject - matthew.moore - ticket - 1\",\n    \"description\": \"Ticket Description - matthew.moore - ticket - 1\",\n    \"category\": \"OTHER\",\n    \"status\": \"IN_PROGRESS\",\n    \"created_ts\": \"2026-06-21T15:50:19.403756\",\n    \"modified_ts\": \"2026-06-21T18:22:47.433226\",\n    \"priority\": \"LOW\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/{{v1_prefix}}/tickets/3",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "{{v1_prefix}}",
+                "tickets",
+                "3"
+              ]
+            },
+            "description": "Generated from cURL: curl --request DELETE --url '{{url}}/{{v1_prefix}}/tickets/{{ticketId}}'"
+          },
+          "response": [
+            {
+              "name": "Delete Ticket",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/{{v1_prefix}}/tickets/3",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "{{v1_prefix}}",
+                    "tickets",
+                    "3"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "date",
+                  "value": "Sun, 21 Jun 2026 20:33:09 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

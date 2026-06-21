@@ -48,6 +48,7 @@ Each compose file defines four services: `server`, `celery`, `postgres`, `redis`
 | Roll back last migration (inside Docker) | `make downgrade` |
 | Run dev server (outside Docker) | `uvicorn src.main:app --reload` |
 | Run Celery worker (outside Docker) | `celery -A src.core.celery worker --loglevel=info` |
+| Seed database with agents + customers | `make seed` |
 
 No test suite exists yet. Commands will be added once `tests/` is established.
 
@@ -75,15 +76,66 @@ Access all settings via the singleton: `from src.core.config import settings`. T
 - Inject the async session via `get_session` from `src.core.database` as a FastAPI dependency.
 - All ORM models extend `Base` from `src.core.models`. `Base` auto-includes an `id: Mapped[int]` integer primary key — do not redeclare it in subclasses.
 - SQL echo is enabled automatically when `ENVIRONMENT=local`.
-- `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`.
+- `BaseRepository[ModelT]` in `src/core/repository.py` provides `get`, `list`, `add`, `delete`, `flush`, `refresh`. Domain repos extend it and add query methods (e.g. `get_by_email`). Domain repo dependency factories live in `src/{app}/dependencies.py`. Call `repo.flush()` then `repo.refresh(instance)` after mutating an ORM object when you need server-generated values (e.g. `modified_ts` from `onupdate=func.now()`) to be present on the instance before Pydantic serialises it — asyncpg does not return UPDATE results via RETURNING, so SQLAlchemy marks the object expired after a flush.
 - Repository methods use `session.flush()`, not `session.commit()`. `get_session` commits on success and rolls back on exception — never call `session.commit()` in a repo or service.
 - When adding a new domain's ORM models, import the models module in `alembic/env.py`: `from src.{app} import models as _  # noqa: F401`. Without this, `--autogenerate` produces an empty migration.
+- FK references use constants: define `<ENTITY>_FK = f"{TABLE_NAME}.id"` in `src/{app}/constants.py` (e.g., `USER_FK = f"{TABLE_NAME}.id"` in `src/users/constants.py`). Import this constant in any model that references the entity as a foreign key — never hardcode `"users.id"` inside a model file.
+- `ON_DELETE_SET_NULL` and `ON_DELETE_CASCADE` are string constants in `src/core/constants.py`. Always import and pass them to `ForeignKey(..., ondelete=ON_DELETE_CASCADE)` — never hardcode the string.
+- Two reusable timestamp mixins live in `src/core/mixins.py` (both declare `__abstract__ = True`):
+  - `CreatedAtMixin`: adds `created_ts: Mapped[datetime]` with `server_default=func.now()`.
+  - `TimestampMixin(CreatedAtMixin)`: inherits `created_ts` and adds `modified_ts: Mapped[datetime]` with `server_default=func.now(), onupdate=func.now()`.
+  - Use `TimestampMixin` for entities that track both creation and last-modified time. Use `CreatedAtMixin` for append-only records (e.g., history entries).
+- `sync_session_factory` in `src.core.database`: a synchronous `sessionmaker` for use inside Celery tasks (which run synchronously). Use with `with sync_session_factory() as session:`. Never use `async_session_factory` in a Celery task.
 
 ### Celery
 
 - The Celery app instance is at `src.core.celery:app`.
 - All tasks use JSON serialization and UTC timezone (configured in `src/core/celery.py` — do not override per-task).
 - Place tasks in `src/{app}/tasks.py` within the relevant domain app.
+- Celery tasks that need DB access must use `sync_session_factory` from `src.core.database` — Celery workers run synchronously, not in an async event loop.
+- Email templates: place HTML files in `src/{app}/templates/`. Load with `read_template(__file__, template_name)` from `src.core.utils`. Use `str.replace("{{placeholder}}", value)` chains for substitution. Use `DATETIME_DISPLAY_FORMAT` from `src.core.constants` to format `datetime` values for display.
+
+### Pagination & Filtering
+
+For paginated list endpoints use `fastapi-pagination` + `fastapi-filter` (both in `requirements/base.txt`).
+
+- **Service layer:** the `list_*` service function is **synchronous** and returns a SQLAlchemy `Select` statement — not a list. It delegates to the repo's query-builder method.
+- **Repository layer:** the query-builder (e.g. `list_query_for_user`) applies `WHERE`/`ORDER BY` and returns a `Select`. Do not execute the query here.
+- **Router layer:** call `paginate(deps.session, query, params=params, transformer=...)` from `fastapi_pagination.ext.sqlalchemy`. The `transformer` lambda selects the correct response schema per role: `lambda items: [Schema.model_validate(t) for t in items]`.
+- **Filter class:** subclass `fastapi_filter.contrib.sqlalchemy.Filter`. Declare fields with the `__in` suffix for multi-value filtering and set `Constants.model = YourModel`. Inject with `FilterDepends(YourFilter)` in the router.
+- **Pagination params:** inject `params: Params = Depends()` from `fastapi_pagination`. Default `size` is 50; no custom pagination constants are needed.
+- **`add_pagination(app)`** is not required when calling `paginate()` explicitly in route handlers — avoid it to keep `main.py` minimal.
+
+### Dependency Bundling
+
+When a router needs multiple repositories **and** a session (required by `paginate()`), group them into a `NameDependencies` class instead of listing four `Depends(...)` parameters on every endpoint:
+
+```python
+class TicketDependencies:
+    def __init__(
+        self,
+        session: AsyncSession = Depends(get_session),
+        repo: TicketRepository = Depends(get_ticket_repository),
+        history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
+        user_repo: UserRepository = Depends(get_user_repository),
+    ) -> None:
+        self.session = session
+        self.repo = repo
+        self.history_repo = history_repo
+        self.user_repo = user_repo
+```
+
+Endpoints declare `deps: TicketDependencies = Depends()`. The `session` attribute is required because `paginate()` takes it directly. Standalone factory functions (`get_ticket_repository`, etc.) still exist for injection outside the bundle.
+
+### Scripts
+
+- Standalone scripts live in `scripts/` at the project root, parallel to `alembic/` and `src/`.
+- `scripts/utils.py` provides shared bootstrap for all scripts:
+  - `setup_path()` — inserts the project root into `sys.path` so `src.*` imports resolve.
+  - `load_envs()` — loads `.envs/local/api.env` and `.envs/local/db.env` into `os.environ`.
+  - `run_async(coro)` — wraps `asyncio.run()` with an explicit `SelectorEventLoop`. Required on Windows because the default `ProactorEventLoop` is incompatible with psycopg async.
+- Every script must call `utils.setup_path()` and `utils.load_envs()` **before** any `src.*` import.
+- Scripts call `await session.commit()` directly — they are not bound by the repo flush-only contract.
 
 ### Constants
 
@@ -117,6 +169,8 @@ Each domain lives under `src/{app}/` and follows this file layout:
 
 `src/users/` and `src/auth/` are reference implementations.
 
+When a detail endpoint must return related entity data (not raw FK ids), define a compact summary schema (e.g., `TicketUserResponse` with `id`, `first_name`, `last_name`, `email`) and override the FK field in the detail response schema with the summary type (`customer: TicketUserResponse | None`). The service fetches the related objects and returns them alongside the main entity (as extra tuple elements). The router constructs the response with `model_dump(exclude={"related_field_name"})` to drop the raw integer FK before merging in the validated summary objects via `**detail_fields`.
+
 ### Layer Separation
 
 Enforce strict separation between layers. Each layer has one responsibility and prohibited imports:
@@ -142,6 +196,7 @@ Key placement rules:
 - Register with `app.add_exception_handler(AppException, app_exception_handler)` in `main.py`.
 - Always use `starlette.status` constants (e.g. `status.HTTP_401_UNAUTHORIZED`), never raw integers.
 - Error message strings are constants in `src/{app}/constants.py`.
+- Use 409 Conflict (`status.HTTP_409_CONFLICT`) for operations blocked by the current resource state — e.g., attempting to modify a ticket that is already RESOLVED or CLOSED, or attempting to delete a ticket that is not OPEN. 409 means "the request is valid but conflicts with the current state of the resource"; it is distinct from 422 (validation failure) and 403 (authorization denied).
 
 ### Authentication
 
@@ -154,6 +209,10 @@ Key placement rules:
 - `CookieSameSite` is a `(str, Enum)` — consistent with `UserRole` and `Environment`.
 - Use `LoginResponse.model_validate(orm_instance)` with `model_config = ConfigDict(from_attributes=True)` in response schemas instead of manually mapping ORM fields.
 - `decode_token` stays as a standalone function, separate from `refresh_access_token` — it is a reusable cryptographic primitive that future token-authenticated endpoints (e.g. `GET /me`) will call directly.
+- Auth dependencies in `src/auth/dependencies.py`:
+  - `get_current_user` — reads the `access_token` cookie, calls `decode_token`, validates token type is `"access"`, fetches the user by id. Raises `InvalidTokenTypeError` or `InvalidCredentialsError` as appropriate.
+  - `require_authentication` — pure pass-through alias for `get_current_user`; makes intent explicit in router signatures for any-role endpoints.
+  - `require_agent` / `require_customer` — check `current_user.role` and raise `AgentRequiredError` (403) or `CustomerRequiredError` (403). Message constants `AGENT_REQUIRED_MSG` / `CUSTOMER_REQUIRED_MSG` live in `src/auth/constants.py`; the exceptions live in `src/auth/exceptions.py`.
 
 ### API
 

@@ -1,2 +1,6 @@
-# support-ticket-management-api-service
-Everestek Technosoft Solutions - Assignment
+# Support Ticket Management API Service
+
+Everestek Technosoft Solutions — Job Assignment
+
+- [Setup & Usage Guide](docs/SETUP.md)
+- [Architecture, Tradeoffs & Assumptions](docs/ARCHITECTURE.md)

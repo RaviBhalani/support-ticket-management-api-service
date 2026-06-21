@@ -10,13 +10,14 @@ from alembic import context
 from src.core.config import settings
 from src.core.models import Base
 from src.users import models as _  # noqa: F401
+from src.tickets import models as _tickets_models  # noqa: F401
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.db.url)
+config.set_main_option("sqlalchemy.url", settings.db.async_url)
 
 target_metadata = Base.metadata
 

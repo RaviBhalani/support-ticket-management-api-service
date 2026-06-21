@@ -10,6 +10,7 @@ from src.core.constants import (
     DB_DEFAULT_PORT,
     DB_DRIVER,
     DB_ASYNC_DRIVER,
+    DB_SYNC_DRIVER,
     REDIS_ENV_PREFIX,
     REDIS_DEFAULT_HOST,
     REDIS_DEFAULT_PORT,
@@ -48,12 +49,19 @@ class DatabaseSettings(BaseSettings):
     host: str = DB_DEFAULT_HOST
     port: int = DB_DEFAULT_PORT
 
-    @property
-    def url(self) -> str:
+    def _build_url(self, driver: str) -> str:
         return (
-            f"{DB_DRIVER}+{DB_ASYNC_DRIVER}://{self.user}:{self.password}"
+            f"{DB_DRIVER}+{driver}://{self.user}:{self.password}"
             f"@{self.host}:{self.port}/{self.db}"
         )
+
+    @property
+    def async_url(self) -> str:
+        return self._build_url(DB_ASYNC_DRIVER)
+
+    @property
+    def sync_url(self) -> str:
+        return self._build_url(DB_SYNC_DRIVER)
 
 
 class RedisSettings(BaseSettings):

@@ -1,1 +1,4 @@
 -r base.txt
+
+# Seed tools
+faker==40.23.0

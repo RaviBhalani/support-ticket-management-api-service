@@ -7,6 +7,7 @@ app = Celery(
     PROJECT_NAME,
     broker=settings.redis.url,
     backend=settings.redis.url,
+    include=["src.tickets.tasks"],
 )
 
 app.conf.update(
