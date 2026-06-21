@@ -5,27 +5,12 @@ Not idempotent — running twice will violate the email unique constraint.
 Truncate the users table before re-seeding:
     docker compose exec postgres psql -U <user> -d <db> -c "TRUNCATE users RESTART IDENTITY CASCADE;"
 """
-import asyncio
 import os
-import selectors
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import utils
 
-
-def _load_env(path: str) -> None:
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            os.environ.setdefault(key.strip(), value.strip())
-
-
-_load_env(".envs/local/api.env")
-_load_env(".envs/local/db.env")
+utils.setup_path()
+utils.load_envs()
 
 import bcrypt
 from faker import Faker
@@ -83,9 +68,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    # Windows defaults to ProactorEventLoop which psycopg async does not support.
-    # SelectorEventLoop is required and works on all platforms.
-    asyncio.run(
-        main(),
-        loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector()),
-    )
+    utils.run_async(main())
