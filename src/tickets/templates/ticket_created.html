@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Ticket Created</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #333333; }
+    .wrapper { max-width: 560px; margin: 40px auto; background-color: #ffffff; border-radius: 6px; overflow: hidden; }
+    .header { background-color: #1a73e8; padding: 24px 32px; }
+    .header h1 { margin: 0; font-size: 20px; color: #ffffff; }
+    .body { padding: 32px; }
+    .body p { margin: 0 0 16px; font-size: 15px; line-height: 1.5; }
+    table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+    td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #eeeeee; }
+    td:first-child { color: #666666; width: 40%; }
+    td:last-child { font-weight: bold; }
+    .footer { padding: 20px 32px; background-color: #f9f9f9; border-top: 1px solid #eeeeee; font-size: 12px; color: #999999; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Support Ticket Created</h1>
+    </div>
+    <div class="body">
+      <p>Hi {{first_name}},</p>
+      <p>Your support ticket has been received. Here is a summary:</p>
+      <table>
+        <tr><td>Ticket ID</td><td>#{{ticket_id}}</td></tr>
+        <tr><td>Subject</td><td>{{subject}}</td></tr>
+        <tr><td>Category</td><td>{{category}}</td></tr>
+        <tr><td>Status</td><td>{{status}}</td></tr>
+        <tr><td>Created</td><td>{{created_ts}}</td></tr>
+      </table>
+      <p>Our team will review your ticket and get back to you as soon as possible.</p>
+    </div>
+    <div class="footer">
+      This is an automated message. Please do not reply to this email.
+    </div>
+  </div>
+</body>
+</html>
