@@ -1,6 +1,6 @@
 ENV ?= local
 
-.PHONY: help run migration upgrade downgrade
+.PHONY: help run migration upgrade downgrade seed
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -18,3 +18,6 @@ upgrade: ## Apply all pending migrations (usage: make upgrade)
 
 downgrade: ## Roll back the last migration (usage: make downgrade)
 	docker compose -f docker-compose.$(ENV).yaml exec server alembic downgrade -1
+
+seed: ## Seed the database with agents and customers (usage: make seed)
+	python scripts/seed.py
