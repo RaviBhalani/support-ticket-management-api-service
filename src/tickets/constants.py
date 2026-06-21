@@ -71,6 +71,7 @@ LIST_TICKETS_ENDPOINT = ""
 CREATE_TICKET_ENDPOINT = ""
 GET_TICKET_ENDPOINT = "/{ticket_id}"
 UPDATE_TICKET_ENDPOINT = "/{ticket_id}"
+DELETE_TICKET_ENDPOINT = "/{ticket_id}"
 
 # Error messages
 CUSTOMER_NOT_FOUND_MSG = "The specified customer does not exist."
@@ -79,6 +80,7 @@ TICKET_NOT_FOUND_MSG = "The specified ticket does not exist."
 TICKET_NOT_ASSIGNED_MSG = "You are not the assigned agent for this ticket."
 TICKET_ACCESS_DENIED_MSG = "You do not have permission to access this ticket."
 TICKET_LOCKED_MSG = "Ticket cannot be modified once it is resolved or closed."
+TICKET_NOT_DELETABLE_MSG = "Ticket can only be deleted when it is open."
 INVALID_STATUS_TRANSITION_MSG = "Invalid status transition."
 
 # Templates
@@ -90,3 +92,4 @@ LOG_TICKET_CREATED_EMAIL_SENT = "ticket_created_email_sent"
 LOG_TICKET_RETRIEVED = "ticket_retrieved"
 LOG_TICKET_UPDATED = "ticket_updated"
 LOG_TICKET_STATUS_CHANGED = "ticket_status_changed"
+LOG_TICKET_DELETED = "ticket_deleted"
