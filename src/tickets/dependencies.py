@@ -21,10 +21,12 @@ class TicketDependencies:
 
     def __init__(
         self,
+        session: AsyncSession = Depends(get_session),
         repo: TicketRepository = Depends(get_ticket_repository),
         history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
         user_repo: UserRepository = Depends(get_user_repository),
     ) -> None:
+        self.session = session
         self.repo = repo
         self.history_repo = history_repo
         self.user_repo = user_repo
