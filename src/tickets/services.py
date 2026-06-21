@@ -83,13 +83,14 @@ async def update_ticket(
 
     status_changed = False
     if data.status is not None:
-        if current_user.role == UserRole.CUSTOMER:
-            raise StatusChangeNotAllowedError()
+        current_status = TicketStatus(ticket.status)
+        if data.status not in VALID_STATUS_TRANSITIONS[current_status]:
+            raise InvalidStatusTransitionError()
         if data.status.value != ticket.status:
             ticket.status = data.status.value
             status_changed = True
 
-    simple_updates = data.model_dump(exclude_unset=True, exclude={"status", "comments"})
+    simple_updates = data.model_dump(exclude_unset=True, exclude={"category", "status", "comments"})
     for field, value in simple_updates.items():
         setattr(ticket, field, value)
 

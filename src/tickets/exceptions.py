@@ -27,3 +27,8 @@ class TicketNotFoundError(AppException):
 class StatusChangeNotAllowedError(AppException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = STATUS_CHANGE_NOT_ALLOWED_MSG
+
+
+class InvalidStatusTransitionError(AppException):
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    detail = INVALID_STATUS_TRANSITION_MSG

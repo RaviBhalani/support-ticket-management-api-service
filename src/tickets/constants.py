@@ -49,13 +49,21 @@ PRIORITY_MAX_LENGTH = max(len(p.value) for p in TicketPriority)
 CATEGORY_MAX_LENGTH = max(len(c.value) for c in TicketCategory)
 STATUS_MAX_LENGTH = max(len(s.value) for s in TicketStatus)
 
-# Priority auto-assigned from category on ticket creation; cannot be updated after that
+# Priority is always derived from category — updating category also updates priority
 CATEGORY_PRIORITY_MAP: dict[TicketCategory, TicketPriority] = {
     TicketCategory.PAYMENTS: TicketPriority.CRITICAL,
     TicketCategory.ACCOUNT: TicketPriority.HIGH,
     TicketCategory.APP_ISSUE: TicketPriority.MEDIUM,
     TicketCategory.SUGGESTION: TicketPriority.LOW,
     TicketCategory.OTHER: TicketPriority.LOW,
+}
+
+# RESOLVED and CLOSED are terminal — no further transitions allowed
+VALID_STATUS_TRANSITIONS: dict[TicketStatus, frozenset[TicketStatus]] = {
+    TicketStatus.OPEN: frozenset({TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.CLOSED}),
+    TicketStatus.IN_PROGRESS: frozenset({TicketStatus.RESOLVED, TicketStatus.CLOSED}),
+    TicketStatus.RESOLVED: frozenset(),
+    TicketStatus.CLOSED: frozenset(),
 }
 
 # Endpoint paths
@@ -66,7 +74,8 @@ UPDATE_TICKET_ENDPOINT = "/{ticket_id}"
 CUSTOMER_NOT_FOUND_MSG = "The specified customer does not exist."
 INVALID_CUSTOMER_ROLE_MSG = "The specified user is not a customer."
 TICKET_NOT_FOUND_MSG = "The specified ticket does not exist."
-STATUS_CHANGE_NOT_ALLOWED_MSG = "Customers are not allowed to change ticket status."
+TICKET_NOT_ASSIGNED_MSG = "You are not the assigned agent for this ticket."
+INVALID_STATUS_TRANSITION_MSG = "Invalid status transition."
 
 # Templates
 TICKET_CREATED_EMAIL_TEMPLATE = "ticket_created.html"
