@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
-from src.auth.dependencies import require_authentication
+from src.auth.dependencies import require_agent, require_authentication
 from src.tickets import services as ticket_service
 from src.tickets.constants import CREATE_TICKET_ENDPOINT, UPDATE_TICKET_ENDPOINT
 from src.tickets.dependencies import get_ticket_history_repository, get_ticket_repository
@@ -32,7 +32,7 @@ async def create_ticket(
 async def update_ticket(
     ticket_id: int,
     body: UpdateTicketRequest,
-    current_user: User = Depends(require_authentication),
+    current_user: User = Depends(require_agent),
     repo: TicketRepository = Depends(get_ticket_repository),
     history_repo: TicketHistoryRepository = Depends(get_ticket_history_repository),
 ) -> AgentTicketResponse | TicketResponse:
