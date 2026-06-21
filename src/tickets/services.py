@@ -5,6 +5,7 @@ from sqlalchemy import Select
 from src.tickets.constants import (
     CATEGORY_PRIORITY_MAP,
     LOG_TICKET_CREATED,
+    LOG_TICKET_DELETED,
     LOG_TICKET_RETRIEVED,
     LOG_TICKET_STATUS_CHANGED,
     LOG_TICKET_UPDATED,
@@ -19,6 +20,7 @@ from src.tickets.exceptions import (
     TicketAccessDeniedError,
     TicketLockedError,
     TicketNotAssignedError,
+    TicketNotDeletableError,
     TicketNotFoundError,
 )
 from src.tickets.models import Ticket, TicketHistory
@@ -163,3 +165,23 @@ async def update_ticket(
     logger.info(LOG_TICKET_UPDATED, ticket_id=ticket.id)
 
     return ticket
+
+
+async def delete_ticket(
+    ticket_id: int,
+    repo: TicketRepository,
+    current_user: User,
+) -> None:
+    ticket = await repo.get(ticket_id)
+    if not ticket:
+        raise TicketNotFoundError()
+
+    if ticket.customer != current_user.id:
+        raise TicketAccessDeniedError()
+
+    if TicketStatus(ticket.status) != TicketStatus.OPEN:
+        raise TicketNotDeletableError()
+
+    await repo.delete(ticket)
+
+    logger.info(LOG_TICKET_DELETED, ticket_id=ticket_id)

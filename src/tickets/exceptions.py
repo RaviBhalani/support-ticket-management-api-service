@@ -8,6 +8,7 @@ from src.tickets.constants import (
     TICKET_ACCESS_DENIED_MSG,
     TICKET_LOCKED_MSG,
     TICKET_NOT_ASSIGNED_MSG,
+    TICKET_NOT_DELETABLE_MSG,
     TICKET_NOT_FOUND_MSG,
 )
 
@@ -45,3 +46,8 @@ class TicketAccessDeniedError(AppException):
 class TicketLockedError(AppException):
     status_code = status.HTTP_409_CONFLICT
     detail = TICKET_LOCKED_MSG
+
+
+class TicketNotDeletableError(AppException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = TICKET_NOT_DELETABLE_MSG
