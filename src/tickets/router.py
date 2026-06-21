@@ -46,25 +46,23 @@ async def get_ticket(
     user_repo: UserRepository = Depends(get_user_repository),
 ) -> AgentTicketDetailResponse | TicketDetailResponse:
 
-    ticket, history, customer_user, agent_user = await ticket_service.get_ticket(
+    ticket, ticket_history, customer_user, agent_user = await ticket_service.get_ticket(
         ticket_id, repo, history_repo, user_repo, current_user
     )
-    history_out = [TicketHistoryResponse.model_validate(h) for h in history]
-    customer_out = TicketUserResponse.model_validate(customer_user) if customer_user else None
-    agent_out = TicketUserResponse.model_validate(agent_user) if agent_user else None
+    detail_fields = {
+        "history": [TicketHistoryResponse.model_validate(h) for h in ticket_history],
+        "customer": TicketUserResponse.model_validate(customer_user) if customer_user else None,
+        "agent": TicketUserResponse.model_validate(agent_user) if agent_user else None,
+    }
 
     if current_user.role == UserRole.AGENT:
         return AgentTicketDetailResponse(
             **AgentTicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
-            customer=customer_out,
-            agent=agent_out,
-            history=history_out,
+            **detail_fields,
         )
     return TicketDetailResponse(
         **TicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
-        customer=customer_out,
-        agent=agent_out,
-        history=history_out,
+        **detail_fields,
     )
 
 
