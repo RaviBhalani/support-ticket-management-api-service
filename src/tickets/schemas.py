@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import ClassVar, Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,6 +12,8 @@ from src.tickets.constants import (
     TicketPriority,
     TicketStatus,
 )
+from src.tickets.models import Ticket, TicketHistory
+from src.users.models import User
 
 
 class CreateTicketRequest(BaseModel):
@@ -67,9 +70,23 @@ class TicketDetailResponse(TicketResponse):
     customer: TicketUserResponse | None
     agent: TicketUserResponse | None
     history: list[TicketHistoryResponse]
+    _flat_schema: ClassVar[type[TicketResponse]] = TicketResponse
+
+    @classmethod
+    def build(
+        cls,
+        ticket: Ticket,
+        history: list[TicketHistory],
+        customer_user: User | None,
+        agent_user: User | None,
+    ) -> Self:
+        return cls(
+            **cls._flat_schema.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
+            customer=TicketUserResponse.model_validate(customer_user) if customer_user else None,
+            agent=TicketUserResponse.model_validate(agent_user) if agent_user else None,
+            history=[TicketHistoryResponse.model_validate(h) for h in history],
+        )
 
 
-class AgentTicketDetailResponse(AgentTicketResponse):
-    customer: TicketUserResponse | None
-    agent: TicketUserResponse | None
-    history: list[TicketHistoryResponse]
+class AgentTicketDetailResponse(TicketDetailResponse, AgentTicketResponse):
+    _flat_schema: ClassVar[type[TicketResponse]] = AgentTicketResponse

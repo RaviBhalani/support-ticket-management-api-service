@@ -49,21 +49,9 @@ async def get_ticket(
     ticket, ticket_history, customer_user, agent_user = await ticket_service.get_ticket(
         ticket_id, repo, history_repo, user_repo, current_user
     )
-    detail_fields = {
-        "history": [TicketHistoryResponse.model_validate(h) for h in ticket_history],
-        "customer": TicketUserResponse.model_validate(customer_user) if customer_user else None,
-        "agent": TicketUserResponse.model_validate(agent_user) if agent_user else None,
-    }
-
     if current_user.role == UserRole.AGENT:
-        return AgentTicketDetailResponse(
-            **AgentTicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
-            **detail_fields,
-        )
-    return TicketDetailResponse(
-        **TicketResponse.model_validate(ticket).model_dump(exclude={"customer", "agent"}),
-        **detail_fields,
-    )
+        return AgentTicketDetailResponse.build(ticket, ticket_history, customer_user, agent_user)
+    return TicketDetailResponse.build(ticket, ticket_history, customer_user, agent_user)
 
 
 @router.patch(UPDATE_TICKET_ENDPOINT, status_code=status.HTTP_200_OK)
