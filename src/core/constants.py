@@ -32,7 +32,8 @@ SERVER_DEFAULT_PORT = 8000
 DB_DEFAULT_HOST = "postgres"
 DB_DEFAULT_PORT = 5432
 DB_DRIVER = "postgresql"
-DB_ASYNC_DRIVER = "asyncpg"
+DB_ASYNC_DRIVER = "psycopg_async"
+DB_SYNC_DRIVER = "psycopg"
 
 # Redis
 REDIS_DEFAULT_HOST = "redis"
