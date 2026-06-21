@@ -25,6 +25,9 @@ class BaseRepository(Generic[ModelT]):
         await self._session.flush()
         return instance
 
+    async def flush(self) -> None:
+        await self._session.flush()
+
     async def delete(self, instance: ModelT) -> None:
         await self._session.delete(instance)
         await self._session.flush()
