@@ -3,6 +3,7 @@ import structlog
 from src.tickets.constants import (
     CATEGORY_PRIORITY_MAP,
     LOG_TICKET_CREATED,
+    LOG_TICKET_RETRIEVED,
     LOG_TICKET_STATUS_CHANGED,
     LOG_TICKET_UPDATED,
     VALID_STATUS_TRANSITIONS,
@@ -13,6 +14,7 @@ from src.tickets.exceptions import (
     CustomerNotFoundError,
     InvalidCustomerRoleError,
     InvalidStatusTransitionError,
+    TicketAccessDeniedError,
     TicketNotAssignedError,
     TicketNotFoundError,
 )
@@ -70,6 +72,29 @@ async def create_ticket(
     logger.info(LOG_TICKET_CREATED, ticket_id=ticket.id, customer_id=ticket.customer)
 
     return ticket
+
+
+async def get_ticket(
+    ticket_id: int,
+    repo: TicketRepository,
+    history_repo: TicketHistoryRepository,
+    current_user: User,
+) -> tuple[Ticket, list[TicketHistory]]:
+    ticket = await repo.get(ticket_id)
+    if not ticket:
+        raise TicketNotFoundError()
+
+    if current_user.role == UserRole.CUSTOMER and ticket.customer != current_user.id:
+        raise TicketAccessDeniedError()
+
+    if current_user.role == UserRole.AGENT and ticket.agent != current_user.id:
+        raise TicketAccessDeniedError()
+
+    history = await history_repo.list_by_ticket(ticket_id)
+
+    logger.info(LOG_TICKET_RETRIEVED, ticket_id=ticket.id)
+
+    return ticket, history
 
 
 async def update_ticket(

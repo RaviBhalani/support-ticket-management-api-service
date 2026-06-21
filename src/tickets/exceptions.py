@@ -5,6 +5,7 @@ from src.tickets.constants import (
     CUSTOMER_NOT_FOUND_MSG,
     INVALID_CUSTOMER_ROLE_MSG,
     INVALID_STATUS_TRANSITION_MSG,
+    TICKET_ACCESS_DENIED_MSG,
     TICKET_NOT_ASSIGNED_MSG,
     TICKET_NOT_FOUND_MSG,
 )
@@ -33,3 +34,8 @@ class TicketNotAssignedError(AppException):
 class InvalidStatusTransitionError(AppException):
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     detail = INVALID_STATUS_TRANSITION_MSG
+
+
+class TicketAccessDeniedError(AppException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = TICKET_ACCESS_DENIED_MSG
